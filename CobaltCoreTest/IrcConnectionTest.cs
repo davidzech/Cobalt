@@ -3,7 +3,7 @@ using CobaltCore.Irc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace UnitTestProject1
+namespace CobaltCoreTest
 {
     [TestClass]
     public class IrcConnectionTest
