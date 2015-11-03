@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,14 +19,13 @@ namespace CobaltCore.Irc
         private async Task OpenSocketAsync()
         {
             _wtoken = new CancellationTokenSource();
-            if (string.IsNullOrEmpty(this.Hostname))
-                throw new ArgumentNullException("server");
-            if (this.Port <= 0 || this.Port > 65535)
-                throw new ArgumentOutOfRangeException("port");
+            if (string.IsNullOrEmpty(Hostname))
+                throw new ArgumentNullException(nameof(Hostname));
+            if (Port <= 0 || Port > 65535)
+                throw new ArgumentOutOfRangeException(nameof(Port));
 
-            if (this.Proxy != null && !string.IsNullOrEmpty(Proxy.ProxyHostname))
+            if (!string.IsNullOrEmpty(Proxy?.ProxyHostname))
             {
-
             }
             else
             {
@@ -37,31 +35,40 @@ namespace CobaltCore.Irc
             try
             {
                 // try connecting
-                this.State = IrcConnectionState.Connecting;
-                Task connectTask = _tcpClient.ConnectAsync(this.Hostname, this.Port);
-                Task connectTimeoutTask = Task.Run(async () => await Task.Delay(5000, _wtoken.Token).ConfigureAwait(false));
+                State = IrcConnectionState.Connecting;
+                var connectTask = _tcpClient.ConnectAsync(Hostname, Port);
+                var connectTimeoutTask =
+                    Task.Run(async () => await Task.Delay(5000, _wtoken.Token).ConfigureAwait(false));
                 var firstCompletedTask = await Task.WhenAny(connectTask, connectTimeoutTask).ConfigureAwait(false);
 
                 if (firstCompletedTask == connectTimeoutTask)
                 {
-                    this.State = IrcConnectionState.Disconnected;
+                    State = IrcConnectionState.Disconnected;
                 }
                 else
                 {
                     await SocketEntryAsync(_wtoken.Token).ConfigureAwait(false);
-                    await this.Socket_OnConnected();
+                    await Socket_OnConnected();
                 }
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
-
+                OnConnectionError(new ErrorEventArgs(e));
             }
+        }
+
+        private void Close()
+        {
+            _wtoken.Cancel();
+            _tcpClient.Close();
+            _tcpClient = null;
+            State = IrcConnectionState.Disconnected;
         }
 
         private async Task SocketEntryAsync(CancellationToken ct)
         {
             _stream = _tcpClient.GetStream();
-            if (this.IsSecure)
+            if (IsSecure)
             {
                 var sslStream = new SslStream(_stream, true, (sender, cert, chain, sslPolicyErrors) =>
                 {
@@ -71,54 +78,60 @@ namespace CobaltCore.Irc
 #warning Incomplete code
                         // yield invalid ssl event
                     }
-                    else
-                    {
-                        return true; // accept all insecure certificates
-                    }
+                    return true; // accept all insecure certificates
                 });
                 await sslStream.AuthenticateAsClientAsync(Hostname).ConfigureAwait(false);
                 _stream = sslStream;
             }
-
-            try
+            _socketLoopTask = Task.Run(async () =>
             {
-                _socketLoopTask = Task.Run(async () =>
+                try
                 {
                     await SocketLoopAsync(ct).ConfigureAwait(false);
-                }, _wtoken.Token);                
-            }
-            catch (Exception e) 
-            {
-#warning Incomplete code
-            }
+                }
+                catch (IOException ex)
+                {
+                    OnConnectionError(new ErrorEventArgs(ex));
+                }
+                catch (SocketException ex)
+                {
+                    OnConnectionError(new ErrorEventArgs(ex));
+                }
+                finally
+                {
+                    Close();
+                }
+#warning Add SocksException
+            }, _wtoken.Token);
+
         }
 
         private async Task SocketLoopAsync(CancellationToken ct)
         {
-            byte[] readBuffer = new byte[512], writeBuffer = new byte[Encoding.UTF8.GetMaxByteCount(512)];
+            byte[] readBuffer = new byte[512];
 
-            while(_tcpClient.Connected && !_wtoken.Token.IsCancellationRequested)
+            while (_tcpClient.Connected && !_wtoken.Token.IsCancellationRequested)
             {
                 var heartBeatTask = Task.Delay(HeartbeatInterval, ct);
                 var readTask = _stream.ReadAsync(readBuffer, 0, 512, ct);
 
                 var completed = await Task.WhenAny(heartBeatTask, readTask).ConfigureAwait(false);
 
-                if(completed == heartBeatTask)
+                if (completed == heartBeatTask)
                 {
-                    this.Socket_OnHeartbeat();
+                    Socket_OnHeartbeat();
                 }
-                else if(completed == readTask)
+                else if (completed == readTask)
                 {
-                    int read = await readTask.ConfigureAwait(false);
+                    var read = await readTask.ConfigureAwait(false);
                     if (read == 0)
                     {
                         // 0 bytes mean socket close
-                        _tcpClient.Close();
+                        Close();
                     }
                     else
                     {
-                        bool gotCarriageReturn = false;
+                        var gotCarriageReturn = false;
                         var input = new List<byte>();
                         foreach (var cur in readBuffer)
                         {
@@ -128,7 +141,7 @@ namespace CobaltCore.Irc
                                     if (gotCarriageReturn)
                                     {
                                         var incoming = IrcMessage.Parse(Encoding.UTF8.GetString(input.ToArray()));
-                                        this.OnMessageReceived(new IrcMessageEventArgs(incoming));
+                                        OnMessageReceived(new IrcMessageEventArgs(incoming));
                                         input.Clear();
                                     }
                                     break;
@@ -141,20 +154,20 @@ namespace CobaltCore.Irc
                             gotCarriageReturn = cur == 0xd;
                         }
                     }
-                }                
+                }
             }
-            this.State = IrcConnectionState.Disconnected;
+            State = IrcConnectionState.Disconnected;
         }
 
-        public async Task PostMessageAsync(IrcMessage message)
+        private async Task PostMessageAsync(IrcMessage message)
         {
-            if(_tcpClient.Connected && _stream != null)
+            if (_tcpClient.Connected && _stream != null)
             {
                 try
                 {
-                    byte[] writeBuffer = new byte[Encoding.UTF8.GetMaxByteCount(512)];
-                    string output = message.ToString();
-                    int count = Encoding.UTF8.GetBytes(output, 0, output.Length, writeBuffer, 0);
+                    var writeBuffer = new byte[Encoding.UTF8.GetMaxByteCount(512)];
+                    var output = message.ToString();
+                    var count = Encoding.UTF8.GetBytes(output, 0, output.Length, writeBuffer, 0);
                     count = Math.Min(510, count);
                     writeBuffer[count] = 0xd;
                     writeBuffer[count + 1] = 0xa;
@@ -162,7 +175,7 @@ namespace CobaltCore.Irc
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("WriteAsync failed ", e);
+                    Console.WriteLine("WriteAsync failed " + e);
                 }
             }
         }
@@ -173,22 +186,25 @@ namespace CobaltCore.Irc
             {
                 await SendAsync(new IrcMessage("PASS", _password)).ConfigureAwait(false);
             }
-            await SendAsync(new IrcMessage("USER", this.Username, _isInvisible ? "4" : "0", "*", this.FullName)).ConfigureAwait(false);
-            await SendAsync(new IrcMessage("NICK", this.Nickname)).ConfigureAwait(false);
+            await
+                SendAsync(new IrcMessage("USER", Username, _isInvisible ? "4" : "0", "*", FullName))
+                    .ConfigureAwait(false);
+            await SendAsync(new IrcMessage("NICK", Nickname)).ConfigureAwait(false);
             var addr = await Dns.GetHostEntryAsync(string.Empty).ConfigureAwait(false);
-            this.InternalAddress = this.ExternalAddress = addr.AddressList.Where((ip) => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).FirstOrDefault();
+            InternalAddress =
+                ExternalAddress = addr.AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
         }
 
         private async void Socket_OnHeartbeat()
         {
             if (_isWaitingForActivity)
             {
-                _tcpClient.Close();
+                Close();
             }
             else
             {
                 _isWaitingForActivity = true;
-                await this.SendAsync("PING", this.Hostname).ConfigureAwait(false);
+                await SendAsync("PING", Hostname).ConfigureAwait(false);
             }
         }
     }
