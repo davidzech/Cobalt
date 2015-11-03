@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using CobaltCore.Irc;
 
 namespace Cobalt
 {
@@ -13,5 +14,9 @@ namespace Cobalt
     /// </summary>
     public partial class App : Application
     {
+
+        public App()
+        {
+        }
     }
 }

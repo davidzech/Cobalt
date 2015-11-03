@@ -11,19 +11,24 @@ namespace CobaltCoreTest
         [TestMethod]
         public async Task TestConnection()
         {
+            Console.WriteLine("Handled State Changed");
             IrcConnection c = new IrcConnection();
-
-            await c.ConnectAsync("irc.memers.co", 6667, false, "Test", "test", "test", false);
+            bool connected = false;
             c.StateChanged += async (sender, e) =>
             {
-                if(c.State == IrcConnectionState.Connected)
-                {
-                    await c.JoinAsync("#dev");
-                    await c.PrivateMessageAsync(new IrcTarget("#dev"), "Hello!");
-                }
-            };   
-            await Task.Delay(10000);
-            await c.QuitAsync("");
+                if (c.State != IrcConnectionState.Connected) return;
+                Console.WriteLine("Handled State Changed");
+                await c.JoinAsync("#dev").ConfigureAwait(false);
+            };
+            c.SelfJoined += async (sender, e) =>
+            {
+                await c.PrivateMessageAsync(new IrcTarget("#dev"), "Hello!");
+                await c.QuitAsync("Bye");
+                connected = true;
+            };
+            await c.ConnectAsync("irc.memers.co", 6667, false, "Test", "test", "test", false);
+            await Task.Delay(20000);
+            Assert.IsTrue(connected);
         }
     }
 }

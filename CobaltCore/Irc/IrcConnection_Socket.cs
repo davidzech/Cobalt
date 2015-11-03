@@ -59,8 +59,8 @@ namespace CobaltCore.Irc
 
         private void Close()
         {
-            _wtoken.Cancel();
-            _tcpClient.Close();
+            _wtoken?.Cancel();
+            _tcpClient?.Close();
             _tcpClient = null;
             State = IrcConnectionState.Disconnected;
         }
@@ -108,55 +108,64 @@ namespace CobaltCore.Irc
 
         private async Task SocketLoopAsync(CancellationToken ct)
         {
-            byte[] readBuffer = new byte[512];
-
-            while (_tcpClient.Connected && !_wtoken.Token.IsCancellationRequested)
+            try
             {
-                var heartBeatTask = Task.Delay(HeartbeatInterval, ct);
-                var readTask = _stream.ReadAsync(readBuffer, 0, 512, ct);
+                byte[] readBuffer = new byte[512];
 
-                var completed = await Task.WhenAny(heartBeatTask, readTask).ConfigureAwait(false);
+                while (_tcpClient != null && _tcpClient.Connected && !_wtoken.Token.IsCancellationRequested)
+                {
+                    var heartBeatTask = Task.Delay(HeartbeatInterval, ct);
+                    var readTask = _stream.ReadAsync(readBuffer, 0, 512, ct);
 
-                if (completed == heartBeatTask)
-                {
-                    Socket_OnHeartbeat();
-                }
-                else if (completed == readTask)
-                {
-                    var read = await readTask.ConfigureAwait(false);
-                    if (read == 0)
+                    var completed = await Task.WhenAny(heartBeatTask, readTask).ConfigureAwait(false);
+
+                    if (completed == heartBeatTask)
                     {
-                        // 0 bytes mean socket close
-                        Close();
+                        Socket_OnHeartbeat();
                     }
-                    else
+                    else if (completed == readTask)
                     {
-                        var gotCarriageReturn = false;
-                        var input = new List<byte>();
-                        foreach (var cur in readBuffer)
+                        var read = readTask.Result;
+                        if (read == 0)
                         {
-                            switch (cur)
+                            // 0 bytes mean socket close
+                            Close();
+                        }
+                        else
+                        {
+                            var gotCarriageReturn = false;
+                            var input = new List<byte>();
+                            for(int i = 0; i < read; i++)
                             {
-                                case 0xa:
-                                    if (gotCarriageReturn)
-                                    {
-                                        var incoming = IrcMessage.Parse(Encoding.UTF8.GetString(input.ToArray()));
-                                        OnMessageReceived(new IrcMessageEventArgs(incoming));
-                                        input.Clear();
-                                    }
-                                    break;
-                                case 0xd:
-                                    break;
-                                default:
-                                    input.Add(cur);
-                                    break;
+                                byte cur = readBuffer[i];
+                                switch (cur)
+                                {
+                                    case 0xa:
+                                        if (gotCarriageReturn)
+                                        {
+                                            var incoming = IrcMessage.Parse(Encoding.UTF8.GetString(input.ToArray()));
+                                            OnMessageReceived(new IrcMessageEventArgs(incoming));
+                                            input.Clear();
+                                        }
+                                        break;
+                                    case 0xd:
+                                        break;
+                                    default:
+                                        input.Add(cur);
+                                        break;
+                                }
+                                gotCarriageReturn = cur == 0xd;
                             }
-                            gotCarriageReturn = cur == 0xd;
                         }
                     }
                 }
+                Close();
             }
-            State = IrcConnectionState.Disconnected;
+            catch (Exception e)
+            {
+                this.OnConnectionError(new ErrorEventArgs(e));
+            }
+
         }
 
         private async Task PostMessageAsync(IrcMessage message)
@@ -186,8 +195,7 @@ namespace CobaltCore.Irc
             {
                 await SendAsync(new IrcMessage("PASS", _password)).ConfigureAwait(false);
             }
-            await
-                SendAsync(new IrcMessage("USER", Username, _isInvisible ? "4" : "0", "*", FullName))
+            await SendAsync(new IrcMessage("USER", Username, _isInvisible ? "4" : "0", "*", FullName))
                     .ConfigureAwait(false);
             await SendAsync(new IrcMessage("NICK", Nickname)).ConfigureAwait(false);
             var addr = await Dns.GetHostEntryAsync(string.Empty).ConfigureAwait(false);

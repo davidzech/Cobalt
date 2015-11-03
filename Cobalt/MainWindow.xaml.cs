@@ -12,8 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CobaltCore.Irc;
 
-namespace Cobalt_2
+namespace Cobalt
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

@@ -125,13 +125,7 @@ namespace CobaltCore.Irc
         /// </summary>
         public ProxyInfo Proxy { get; set; }
 
-        public Task SocketLoop
-        {
-            get
-            {
-                return _socketLoopTask;
-            }
-        }
+        public Task SocketLoop => _socketLoopTask;
 
         /// <summary>
         /// Gets the current state of the session.
@@ -454,8 +448,7 @@ namespace CobaltCore.Irc
             if (this.State != IrcConnectionState.Disconnected)
             {
                 await this.SendAsync("QUIT", text);
-                _wtoken.Cancel();
-                _tcpClient.Close();
+                Close();
             }
         }
 
@@ -789,7 +782,7 @@ namespace CobaltCore.Irc
         {
             if (this.State == IrcConnectionState.Connected && _findExternalAddress)
             {
-                this.AddHandler(new IrcCodeHandler((e) =>
+                this.AddHandler(new IrcCodeHandler(async (e) =>
                 {
                     e.Handled = true;
                     if (e.Message.Parameters.Count < 2)
@@ -803,18 +796,20 @@ namespace CobaltCore.Irc
                         IPAddress external;
                         if (!IPAddress.TryParse(parts[1], out external))
                         {
-                            Dns.BeginGetHostEntry(parts[1], (ar) =>
+                            try
                             {
-                                try
+                                var dns = await Dns.GetHostEntryAsync(parts[1]);
+                                this.ExternalAddress = dns.AddressList[0];
+                            }
+                            catch (SocketException se)
+                            {
+                                if (System.Diagnostics.Debugger.IsAttached)
                                 {
-                                    var host = Dns.EndGetHostEntry(ar);
-                                    if (host.AddressList.Length > 0)
-                                    {
-                                        this.ExternalAddress = host.AddressList[0];
-                                    }
+                                    System.Diagnostics.Debug.WriteLine("Failed to get external address: " + se);
                                 }
-                                catch { }
-                            }, null);
+                                this.ExternalAddress = external;
+                            }
+
                         }
                         else
                         {
@@ -1036,7 +1031,7 @@ namespace CobaltCore.Irc
             }
         }
 
-        private void OnOther(IrcMessage message)
+        private async void OnOther(IrcMessage message)
         {
             int code;
             if (int.TryParse(message.Command, out code))
@@ -1054,14 +1049,13 @@ namespace CobaltCore.Irc
 
                 if (_captures.Count > 0)
                 {
-                    lock (_captures)
-                    {
                         var capturesToRemove = new List<IrcCodeHandler>();
                         foreach (var capture in _captures.Where((c) => c.Codes.Contains(e.Code)))
                         {
                             if (capture != null)
                             {
-                                if (capture.Handler(e))
+                                bool result = await capture.Handler(e).ConfigureAwait(false);
+                                if (result == true)
                                 {
                                     // if it returns true remove the handler
                                     capturesToRemove.Add(capture);
@@ -1073,7 +1067,6 @@ namespace CobaltCore.Irc
                             }
                         }
                         _captures = _captures.Except(capturesToRemove).ToList();
-                    }
                 }
                 this.RaiseEvent(this.InfoReceived, e);
             }
