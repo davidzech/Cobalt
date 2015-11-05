@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace CobaltCore.Irc
 {
@@ -36,11 +37,40 @@ namespace CobaltCore.Irc
 		/// </summary>
 		public Exception Exception { get; private set; }
 
-		public ErrorEventArgs(Exception ex)
+        public string Message { get; private set; }
+
+	    public ErrorEventArgs(string message = null)
+	    {
+            Message = message;
+	    }
+
+	    public ErrorEventArgs(Exception ex)
+	    {
+            Exception = ex;
+	    }
+
+		public ErrorEventArgs(Exception ex, string message)
 		{
-			this.Exception = ex;
+			Exception = ex;
+            Message = message;
 		}
-	}
+
+	    public override string ToString()
+        {
+            if (Message != null)
+            {
+                return Message;
+            }
+            else if (Exception != null)
+            {
+                return Exception.Message;
+            }
+            else
+            {
+                return "";
+            }
+        }
+    }
 
 	/// <summary>
 	/// Provides event arguments describing a nickname change event.
@@ -61,7 +91,7 @@ namespace CobaltCore.Irc
 			: base(message)
 		{
 			var peer = message.From as IrcPeer;
-			this.OldNickname = peer != null ? peer.Nickname : null;
+			this.OldNickname = peer?.Nickname;
 			this.NewNickname = message.Parameters.Count > 0 ? message.Parameters[0] : null;
 		}
 	}

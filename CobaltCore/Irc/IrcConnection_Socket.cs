@@ -47,6 +47,7 @@ namespace CobaltCore.Irc
                 }
                 else
                 {
+                    await connectTask; // we await the finished task so we can throw the exception
                     await SocketEntryAsync(_wtoken.Token).ConfigureAwait(false);
                     await Socket_OnConnected();
                 }
@@ -74,9 +75,14 @@ namespace CobaltCore.Irc
                 {
                     if (!AcceptInsecureCertificate)
                     {
-                        return sslPolicyErrors == SslPolicyErrors.None;
-#warning Incomplete code
-                        // yield invalid ssl event
+                        if (sslPolicyErrors == SslPolicyErrors.None)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            OnConnectionError(new ErrorEventArgs("Server has an invalid Ssl Certificate"));
+                        }
                     }
                     return true; // accept all insecure certificates
                 });
@@ -121,7 +127,7 @@ namespace CobaltCore.Irc
 
                     if (completed == heartBeatTask)
                     {
-                        Socket_OnHeartbeat();
+                        await Socket_OnHeartbeat();
                     }
                     else if (completed == readTask)
                     {
@@ -144,7 +150,7 @@ namespace CobaltCore.Irc
                                         if (gotCarriageReturn)
                                         {
                                             var incoming = IrcMessage.Parse(Encoding.UTF8.GetString(input.ToArray()));
-                                            OnMessageReceived(new IrcMessageEventArgs(incoming));
+                                            await OnMessageReceived(new IrcMessageEventArgs(incoming));
                                             input.Clear();
                                         }
                                         break;
@@ -163,7 +169,7 @@ namespace CobaltCore.Irc
             }
             catch (Exception e)
             {
-                this.OnConnectionError(new ErrorEventArgs(e));
+                OnConnectionError(new ErrorEventArgs(e));
             }
 
         }
@@ -203,7 +209,7 @@ namespace CobaltCore.Irc
                 ExternalAddress = addr.AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
         }
 
-        private async void Socket_OnHeartbeat()
+        private async Task Socket_OnHeartbeat()
         {
             if (_isWaitingForActivity)
             {
