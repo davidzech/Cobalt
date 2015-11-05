@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CobaltCore.Network;
 using CobaltCore.Ctcp;
+using CobaltCore.Network;
 
 namespace CobaltCore.Irc
 {
@@ -63,13 +64,14 @@ namespace CobaltCore.Irc
 
         /// <summary>
         /// Gets a value indicating whether the session uses an encrypted (SSL) connection.
+
         /// </summary>
-        public bool IsSecure { get; private set; }
 
         /// <summary>
+        public bool IsSecure { get; private set; }
         /// Gets a value that determines whether or not the connection should allow insecure TLS Connections
         /// </summary>
-        public bool AcceptInsecureCertificate { get; private set; }
+        public bool AcceptInsecureCertificate => true;
 
         /// <summary>
         /// Gets the current nickname or the desired nickname if the session is not connected.
@@ -125,14 +127,6 @@ namespace CobaltCore.Irc
         /// </summary>
         public ProxyInfo Proxy { get; set; }
 
-        public Task SocketLoop
-        {
-            get
-            {
-                return _socketLoopTask;
-            }
-        }
-
         /// <summary>
         /// Gets the current state of the session.
         /// </summary>
@@ -147,7 +141,7 @@ namespace CobaltCore.Irc
                 if (_state != value)
                 {
                     _state = value;
-                    this.OnStateChanged();
+                    OnStateChanged();
                 }
             }
         }
@@ -263,8 +257,8 @@ namespace CobaltCore.Irc
         /// </summary>
         public IrcConnection()
         {
-            this.State = IrcConnectionState.Disconnected;
-            this.UserModes = new char[0];
+            State = IrcConnectionState.Disconnected;
+            UserModes = new char[0];
 
         }
 
@@ -292,17 +286,17 @@ namespace CobaltCore.Irc
             _password = password;
             _isInvisible = invisible;
             _findExternalAddress = findExternalAddress;
-            this.Nickname = nickname;
-            this.Hostname = hostname;
-            this.Port = port;
-            this.IsSecure = isSecure;
-            this.Username = userName;
-            this.FullName = fullname;
-            this.NetworkName = this.Hostname; // just for now
-            this.UserModes = new char[0];
-            this.AutoReconnect = autoReconnect;
-            this.Proxy = proxy;
-            this.ForceDisconnect = false;
+            Nickname = nickname;
+            Hostname = hostname;
+            Port = port;
+            IsSecure = isSecure;
+            Username = userName;
+            FullName = fullname;
+            NetworkName = Hostname; // just for now
+            UserModes = new char[0];
+            AutoReconnect = autoReconnect;
+            Proxy = proxy;
+            ForceDisconnect = false;
 
             await OpenSocketAsync().ConfigureAwait(false);
         }
@@ -324,7 +318,7 @@ namespace CobaltCore.Irc
         public bool IsSelf(IrcTarget target)
         {
             return target != null && !target.IsChannel &&
-                string.Compare(target.Name, this.Nickname, StringComparison.OrdinalIgnoreCase) == 0;
+                string.Compare(target.Name, Nickname, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>
@@ -334,7 +328,7 @@ namespace CobaltCore.Irc
         /// <returns>True if the nickname matches the session's current nickname, false otherwise.</returns>
         public bool IsSelf(string nick)
         {
-            return string.Compare(this.Nickname, nick, StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Compare(Nickname, nick, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>
@@ -343,7 +337,7 @@ namespace CobaltCore.Irc
         /// <param name="message">The message to send.</param>
         public async Task SendAsync(IrcMessage message)
         {
-            if (this.State != IrcConnectionState.Disconnected)
+            if (State != IrcConnectionState.Disconnected)
             {
                 await PostMessageAsync(message);
             }
@@ -356,7 +350,7 @@ namespace CobaltCore.Irc
         /// <param name="parameters">The optional command parameters.</param>
         public async Task SendAsync(string command, params string[] parameters)
         {
-            if (this.State != IrcConnectionState.Disconnected)
+            if (State != IrcConnectionState.Disconnected)
             {
                 await PostMessageAsync(new IrcMessage(command, parameters));
             }
@@ -370,7 +364,7 @@ namespace CobaltCore.Irc
         /// <param name="parameters">The optional command parameters.</param>
         public async Task SendAsync(string command, IrcTarget target, params string[] parameters)
         {
-            await this.SendAsync(command, (new[] { target.ToString() }).Union(parameters).ToArray());
+            await SendAsync(command, (new[] { target.ToString() }).Union(parameters).ToArray());
         }
 
         /// <summary>
@@ -380,7 +374,7 @@ namespace CobaltCore.Irc
         /// <param name="parameters"></param>
         public async Task SendRawAsync(string command, params string[] parameters)
         {
-            if (this.State != IrcConnectionState.Disconnected)
+            if (State != IrcConnectionState.Disconnected)
             {
                 await PostMessageAsync(new IrcMessage(true, null, command, parameters));
             }
@@ -395,7 +389,7 @@ namespace CobaltCore.Irc
         /// is important for preventing an infinite back-and-forth loop between two clients.</param>
         public async Task SendCtcpAsync(IrcTarget target, CtcpCommand command, bool isResponse)
         {
-            await this.SendAsync(isResponse ? "NOTICE" : "PRIVMSG", target, command.ToString());
+            await SendAsync(isResponse ? "NOTICE" : "PRIVMSG", target, command.ToString());
         }
 
         /// <summary>
@@ -404,7 +398,7 @@ namespace CobaltCore.Irc
         /// <param name="rawText">The raw text to send. This should be in the format of a standard IRC message, per RFC 2812.</param>
         public async Task QuoteAsync(string rawText)
         {
-            await this.SendAsync(new IrcMessage(rawText));
+            await SendAsync(new IrcMessage(rawText));
         }
 
         /// <summary>
@@ -413,13 +407,13 @@ namespace CobaltCore.Irc
         /// <param name="newNickname">The new nickname.</param>
         public async Task NickAsync(string newNickname)
         {
-            if (this.State == IrcConnectionState.Connecting || this.State == IrcConnectionState.Connected)
+            if (State == IrcConnectionState.Connecting || State == IrcConnectionState.Connected)
             {
-                await this.SendAsync("NICK", newNickname);
+                await SendAsync("NICK", newNickname);
             }
             else
             {
-                this.Nickname = newNickname;
+                Nickname = newNickname;
             }
         }
 
@@ -430,7 +424,7 @@ namespace CobaltCore.Irc
         /// <param name="text">The message text.</param>
         public async Task PrivateMessageAsync(IrcTarget target, string text)
         {
-            await this.SendAsync("PRIVMSG", target, text);
+            await SendAsync("PRIVMSG", target, text);
         }
 
         /// <summary>
@@ -440,7 +434,7 @@ namespace CobaltCore.Irc
         /// <param name="text">The notice text.</param>
         public async Task NoticeAsync(IrcTarget target, string text)
         {
-            await this.SendAsync("NOTICE", target, text);
+            await SendAsync("NOTICE", target, text);
         }
 
         /// <summary>
@@ -450,12 +444,11 @@ namespace CobaltCore.Irc
         public async Task QuitAsync(string text)
         {
             //this.AutoReconnect = false;
-            this.ForceDisconnect = true;
-            if (this.State != IrcConnectionState.Disconnected)
+            ForceDisconnect = true;
+            if (State != IrcConnectionState.Disconnected)
             {
-                await this.SendAsync("QUIT", text);
-                _wtoken.Cancel();
-                _tcpClient.Close();
+                await SendAsync("QUIT", text);
+                Close();
             }
         }
 
@@ -465,7 +458,7 @@ namespace CobaltCore.Irc
         /// <param name="channel">The name of the channel to join.</param>
         public async Task JoinAsync(string channel)
         {
-            await this.SendAsync("JOIN", channel);    
+            await SendAsync("JOIN", channel);    
         }
 
         /// <summary>
@@ -475,7 +468,7 @@ namespace CobaltCore.Irc
         /// <param name="key">The key required to join the channel.</param>
         public async Task JoinAsync(string channel, string key)
         {
-            await this.SendAsync("JOIN", channel, key);
+            await SendAsync("JOIN", channel, key);
         }
 
         /// <summary>
@@ -485,9 +478,9 @@ namespace CobaltCore.Irc
         public async Task PartAsync(string channel, string message = null)
         {
             if (message != null)
-                await this.SendAsync("PART", channel, message);
+                await SendAsync("PART", channel, message);
             else
-                await this.SendAsync("PART", channel);
+                await SendAsync("PART", channel);
 
         }
 
@@ -498,7 +491,7 @@ namespace CobaltCore.Irc
         /// <param name="topic">The topic text.</param>
         public async Task TopicAsync(string channel, string topic)
         {
-            await this.SendAsync("TOPIC", channel, topic);
+            await SendAsync("TOPIC", channel, topic);
         }
 
         /// <summary>
@@ -507,7 +500,7 @@ namespace CobaltCore.Irc
         /// <param name="channel">The channel on which the topic should be retrieved.</param>
         public async Task TopicAsync(string channel)
         {
-            await this.SendAsync("TOPIC", channel);
+            await SendAsync("TOPIC", channel);
         }
 
         /// <summary>
@@ -517,7 +510,7 @@ namespace CobaltCore.Irc
         /// <param name="nickname">The nickname of the user to invite.</param>
         public async Task InviteAsync(string channel, string nickname)
         {
-            await this.SendAsync("INVITE", nickname, channel);
+            await SendAsync("INVITE", nickname, channel);
         }
 
         /// <summary>
@@ -527,7 +520,7 @@ namespace CobaltCore.Irc
         /// <param name="nickname">The nickname of the user to kick.</param>
         public async Task Kick(string channel, string nickname)
         {
-            await this.SendAsync("KICK", channel, nickname);
+            await SendAsync("KICK", channel, nickname);
         }
 
         /// <summary>
@@ -538,7 +531,7 @@ namespace CobaltCore.Irc
         /// <param name="text">The kick text, typically describing the reason for kicking a user.</param>
         public async Task KickAsync(string channel, string nickname, string text)
         {
-            await this.SendAsync("KICK", channel, nickname, text);
+            await SendAsync("KICK", channel, nickname, text);
         }
 
         /// <summary>
@@ -546,7 +539,7 @@ namespace CobaltCore.Irc
         /// </summary>
         public async Task MotdAsync()
         {
-            await this.SendAsync("MOTD");
+            await SendAsync("MOTD");
         }
 
         /// <summary>
@@ -555,7 +548,7 @@ namespace CobaltCore.Irc
         /// <param name="server">The name of the server from which to request the MOTD.</param>
         public async Task MotdAsync(string server)
         {
-            await this.SendAsync("MOTD", server);
+            await SendAsync("MOTD", server);
         }
 
         /// <summary>
@@ -564,16 +557,16 @@ namespace CobaltCore.Irc
         /// <param name="mask">The wildcard to search for, matching nickname, hostname, server, and full name.</param>
         public async Task WhoAsync(string mask)
         {
-            await this.SendAsync("WHO", mask);
+            await SendAsync("WHO", mask);
         }
 
         /// <summary>
         /// Retrieve information about a user.
         /// </summary>
-        /// <param name="target">The nickname of the user to retrieve information about. Wildcards may or may not be supported.</param>
+        /// <param name="mask">The nickname of the user to retrieve information about. Wildcards may or may not be supported.</param>
         public async Task WhoisAsync(string mask)
         {
-            await this.SendAsync("WHOIS", mask);
+            await SendAsync("WHOIS", mask);
         }
 
         /// <summary>
@@ -584,7 +577,7 @@ namespace CobaltCore.Irc
         /// <param name="target">The nickname of the user to retrieve information about. Wildcards may or may not be supported.</param>
         public async Task WhoisAsync(string target, string mask)
         {
-            await this.SendAsync("WHOIS", target, mask);
+            await SendAsync("WHOIS", target, mask);
         }
 
         /// <summary>
@@ -593,7 +586,7 @@ namespace CobaltCore.Irc
         /// <param name="nickname">The nickname of the user.</param>
         public async Task WhowasAsync(string nickname)
         {
-            await this.SendAsync("WHOWAS", nickname);
+            await SendAsync("WHOWAS", nickname);
         }
 
         /// <summary>
@@ -602,7 +595,7 @@ namespace CobaltCore.Irc
         /// <param name="text">The text to send to users who query the session.</param>
         public async Task AwayAsync(string text)
         {
-            await this.SendAsync("AWAY", text);
+            await SendAsync("AWAY", text);
         }
 
         /// <summary>
@@ -610,7 +603,7 @@ namespace CobaltCore.Irc
         /// </summary>
         public async Task UnAwayAsync()
         {
-            await this.SendAsync("AWAY");
+            await SendAsync("AWAY");
         }
 
         /// <summary>
@@ -619,7 +612,7 @@ namespace CobaltCore.Irc
         /// <param name="nicknames">The nicknames for which to retrieve information.</param>
         public async Task UserHostAsync(params string[] nicknames)
         {
-            await this.SendAsync("USERHOST", nicknames);
+            await SendAsync("USERHOST", nicknames);
         }
 
         /// <summary>
@@ -631,7 +624,7 @@ namespace CobaltCore.Irc
         {
             if (!modes.Any())
             {
-                await this.SendAsync("MODE", new IrcTarget(channel));
+                await SendAsync("MODE", new IrcTarget(channel));
                 return;
             }
 
@@ -643,14 +636,14 @@ namespace CobaltCore.Irc
                 modeChunk.Add(enumerator.Current);
                 if (++i == 3)
                 {
-                    await this.SendAsync("MODE", new IrcTarget(channel), IrcChannelMode.RenderModes(modeChunk));
+                    await SendAsync("MODE", new IrcTarget(channel), IrcChannelMode.RenderModes(modeChunk));
                     modeChunk.Clear();
                     i = 0;
                 }
             }
             if (modeChunk.Count > 0)
             {
-                await this.SendAsync("MODE", new IrcTarget(channel), IrcChannelMode.RenderModes(modeChunk));
+                await SendAsync("MODE", new IrcTarget(channel), IrcChannelMode.RenderModes(modeChunk));
             }
         }
 
@@ -668,7 +661,7 @@ namespace CobaltCore.Irc
         /// </remarks>
         public async Task ModeAsync(string channel, string modeSpec)
         {
-            await this.ModeAsync(channel, IrcChannelMode.ParseModes(modeSpec));
+            await ModeAsync(channel, IrcChannelMode.ParseModes(modeSpec));
         }
 
         /// <summary>
@@ -677,7 +670,7 @@ namespace CobaltCore.Irc
         /// <param name="modes">The collection of modes to set or unset.</param>
         public async Task ModeAsync(IEnumerable<IrcUserMode> modes)
         {
-            await this.SendAsync("MODE", new IrcTarget(this.Nickname), IrcUserMode.RenderModes(modes));
+            await SendAsync("MODE", new IrcTarget(Nickname), IrcUserMode.RenderModes(modes));
         }
 
         /// <summary>
@@ -692,7 +685,7 @@ namespace CobaltCore.Irc
         /// </remarks>
         public async Task ModeAsync(string modeSpec)
         {
-            await this.ModeAsync(IrcUserMode.ParseModes(modeSpec));
+            await ModeAsync(IrcUserMode.ParseModes(modeSpec));
         }
 
         /// <summary>
@@ -703,7 +696,7 @@ namespace CobaltCore.Irc
         {
             if (channel.IsChannel)
             {
-                await this.SendAsync("MODE", channel);
+                await SendAsync("MODE", channel);
             }
         }
 
@@ -714,7 +707,7 @@ namespace CobaltCore.Irc
         /// <param name="target">The name of the server to query.</param>
         public async Task ListAsync(string mask, string target)
         {
-            await this.SendAsync("LIST", mask, target);
+            await SendAsync("LIST", mask, target);
         }
 
         /// <summary>
@@ -723,7 +716,7 @@ namespace CobaltCore.Irc
         /// <param name="mask">The channel name or names to list (supports wildcards).</param>
         public async Task ListAsync(string mask)
         {
-            await this.SendAsync("LIST", mask);
+            await SendAsync("LIST", mask);
         }
 
         /// <summary>
@@ -731,7 +724,7 @@ namespace CobaltCore.Irc
         /// </summary>
         public async Task ListAsync()
         {
-            await this.SendAsync("LIST");
+            await SendAsync("LIST");
         }
 
         /// <summary>
@@ -770,11 +763,11 @@ namespace CobaltCore.Irc
         /// </summary>
         public async Task Reconnect()
         {
-            if (this.State == IrcConnectionState.Connected)
+            if (State == IrcConnectionState.Connected)
             {
-                await this.QuitAsync("Reconnecting...");
+                await QuitAsync("Reconnecting...");
             }
-            this.OnReconnect();
+            OnReconnect();
         }
 
         private void RaiseEvent<T>(EventHandler<T> evt, T e) where T : EventArgs
@@ -787,9 +780,9 @@ namespace CobaltCore.Irc
 
         private async void OnStateChanged()
         {
-            if (this.State == IrcConnectionState.Connected && _findExternalAddress)
+            if (State == IrcConnectionState.Connected && _findExternalAddress)
             {
-                this.AddHandler(new IrcCodeHandler((e) =>
+                AddHandler(new IrcCodeHandler(async e =>
                 {
                     e.Handled = true;
                     if (e.Message.Parameters.Count < 2)
@@ -803,70 +796,72 @@ namespace CobaltCore.Irc
                         IPAddress external;
                         if (!IPAddress.TryParse(parts[1], out external))
                         {
-                            Dns.BeginGetHostEntry(parts[1], (ar) =>
+                            try
                             {
-                                try
+                                var dns = await Dns.GetHostEntryAsync(parts[1]);
+                                ExternalAddress = dns.AddressList[0];
+                            }
+                            catch (SocketException se)
+                            {
+                                if (Debugger.IsAttached)
                                 {
-                                    var host = Dns.EndGetHostEntry(ar);
-                                    if (host.AddressList.Length > 0)
-                                    {
-                                        this.ExternalAddress = host.AddressList[0];
-                                    }
+                                    Debug.WriteLine("Failed to get external address: " + se);
                                 }
-                                catch { }
-                            }, null);
+                                ExternalAddress = external;
+                            }
+
                         }
                         else
                         {
-                            this.ExternalAddress = external;
+                            ExternalAddress = external;
                         }
                     }
                     return true;
                 }, IrcCode.RPL_USERHOST));
-                await this.UserHostAsync(this.Nickname);
+                await UserHostAsync(Nickname);
             }
 
-            this.RaiseEvent(this.StateChanged, EventArgs.Empty);
+            RaiseEvent(StateChanged, EventArgs.Empty);
 
-            if (this.State == IrcConnectionState.Disconnected && this.AutoReconnect && this.ForceDisconnect != true)
+            if (State == IrcConnectionState.Disconnected && AutoReconnect && ForceDisconnect != true)
             {                
                 if (_reconnectTimer != null)
                 {
                     _reconnectTimer.Dispose();
                 }
-                _reconnectTimer = new Timer(new TimerCallback((obj) =>
+                _reconnectTimer = new Timer(obj =>
                 {
-                    this.OnReconnect();
-                }), null, ReconnectWaitTime, System.Threading.Timeout.Infinite);
+                    OnReconnect();
+                }, null, ReconnectWaitTime, Timeout.Infinite);
             }
         }
 
-        private async void OnReconnect()
+        private async Task OnReconnect()
         {
-            if (this.State == IrcConnectionState.Disconnected)
+            if (State == IrcConnectionState.Disconnected)
             {
-                this.State = IrcConnectionState.Connecting;
-                await this.OpenSocketAsync();
+                State = IrcConnectionState.Connecting;
+                await OpenSocketAsync();
             }
         }
 
         private void OnConnectionError(ErrorEventArgs e)
         {
-            this.RaiseEvent(this.ConnectionError, e);
+            RaiseEvent(ConnectionError, e);
         }
 
-        private async void OnMessageReceived(IrcEventArgs e)
+        private async Task OnMessageReceived(IrcEventArgs e)
         {
             _isWaitingForActivity = false;
 
 #if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("RECV: {0}", e.Message.ToString()));
+                Debug.WriteLine("RECV: {0}", e.Message);
             }
 #endif
 
-            this.RaiseEvent(this.RawMessageReceived, e);
+            RaiseEvent(RawMessageReceived, e);
             if (e.Handled)
             {
                 return;
@@ -877,57 +872,57 @@ namespace CobaltCore.Irc
                 case "PING":
                     if (e.Message.Parameters.Count > 0)
                     {
-                        await this.SendRawAsync("PONG", e.Message.Parameters.ToArray());
+                        await SendRawAsync("PONG", e.Message.Parameters.ToArray());
                     }
                     else
                     {
-                        await this.SendRawAsync("PONG");
+                        await SendRawAsync("PONG");
                     }
                     break;
                 case "NICK":
-                    this.OnNickChanged(e.Message);
+                    OnNickChanged(e.Message);
                     break;
                 case "PRIVMSG":
-                    this.OnPrivateMessage(e.Message);
+                    OnPrivateMessage(e.Message);
                     break;
                 case "NOTICE":
-                    this.OnNotice(e.Message);
+                    OnNotice(e.Message);
                     break;
                 case "QUIT":
-                    this.OnQuit(e.Message);
+                    OnQuit(e.Message);
                     break;
                 case "JOIN":
-                    this.OnJoin(e.Message);
+                    OnJoin(e.Message);
                     break;
                 case "PART":
-                    this.OnPart(e.Message);
+                    OnPart(e.Message);
                     break;
                 case "TOPIC":
-                    this.OnTopic(e.Message);
+                    OnTopic(e.Message);
                     break;
                 case "INVITE":
-                    this.OnInvite(e.Message);
+                    OnInvite(e.Message);
                     break;
                 case "KICK":
-                    this.OnKick(e.Message);
+                    OnKick(e.Message);
                     break;
                 case "MODE":
-                    this.OnMode(e.Message);
+                    OnMode(e.Message);
                     break;
                 default:
-                    this.OnOther(e.Message);
+                    await OnOther(e.Message);
                     break;
             }
         }
 
         private void OnMessageSent(IrcEventArgs e)
         {
-            this.RaiseEvent(this.RawMessageSent, e);
+            RaiseEvent(RawMessageSent, e);
 
 #if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("SEND: {0}", e.Message.ToString()));
+                Debug.WriteLine("SEND: {0}", e.Message);
             }
 #endif
         }
@@ -935,24 +930,24 @@ namespace CobaltCore.Irc
         private void OnNickChanged(IrcMessage message)
         {
             var e = new IrcNickEventArgs(message);
-            var handler = this.NickChanged;
-            if (this.IsSelf(e.OldNickname))
+            var handler = NickChanged;
+            if (IsSelf(e.OldNickname))
             {
-                this.Nickname = e.NewNickname;
-                handler = this.SelfNickChanged;
+                Nickname = e.NewNickname;
+                handler = SelfNickChanged;
             }
-            this.RaiseEvent(handler, e);
+            RaiseEvent(handler, e);
         }
 
         private void OnPrivateMessage(IrcMessage message)
         {
             if (message.Parameters.Count > 1 && CtcpCommand.IsCtcpCommand(message.Parameters[1]))
             {
-                this.OnCtcpCommand(message);
+                OnCtcpCommand(message);
             }
             else
             {
-                this.RaiseEvent(this.PrivateMessaged, new IrcMessageEventArgs(message));
+                RaiseEvent(PrivateMessaged, new IrcMessageEventArgs(message));
             }
         }
 
@@ -960,60 +955,60 @@ namespace CobaltCore.Irc
         {
             if (message.Parameters.Count > 1 && CtcpCommand.IsCtcpCommand(message.Parameters[1]))
             {
-                this.OnCtcpCommand(message);
+                OnCtcpCommand(message);
             }
             else
             {
-                this.RaiseEvent(this.Noticed, new IrcMessageEventArgs(message));
+                RaiseEvent(Noticed, new IrcMessageEventArgs(message));
             }
         }
 
         private void OnQuit(IrcMessage message)
         {
-            this.RaiseEvent(this.UserQuit, new IrcQuitEventArgs(message));
+            RaiseEvent(UserQuit, new IrcQuitEventArgs(message));
         }
 
         private void OnJoin(IrcMessage message)
         {
-            var handler = this.Joined;
+            var handler = Joined;
             var e = new IrcJoinEventArgs(message);
-            if (this.IsSelf(e.Who.Nickname))
+            if (IsSelf(e.Who.Nickname))
             {
-                handler = this.SelfJoined;
+                handler = SelfJoined;
             }
-            this.RaiseEvent(handler, e);
+            RaiseEvent(handler, e);
         }
 
         private void OnPart(IrcMessage message)
         {
-            var handler = this.Parted;
+            var handler = Parted;
             var e = new IrcPartEventArgs(message);
-            if (this.IsSelf(e.Who.Nickname))
+            if (IsSelf(e.Who.Nickname))
             {
-                handler = this.SelfParted;
+                handler = SelfParted;
             }
-            this.RaiseEvent(handler, e);
+            RaiseEvent(handler, e);
         }
 
         private void OnTopic(IrcMessage message)
         {
-            this.RaiseEvent(this.TopicChanged, new IrcTopicEventArgs(message));
+            RaiseEvent(TopicChanged, new IrcTopicEventArgs(message));
         }
 
         private void OnInvite(IrcMessage message)
         {
-            this.RaiseEvent(this.Invited, new IrcInviteEventArgs(message));
+            RaiseEvent(Invited, new IrcInviteEventArgs(message));
         }
 
         private void OnKick(IrcMessage message)
         {
-            var handler = this.Kicked;
+            var handler = Kicked;
             var e = new IrcKickEventArgs(message);
-            if (this.IsSelf(e.KickeeNickname))
+            if (IsSelf(e.KickeeNickname))
             {
-                handler = this.SelfKicked;
+                handler = SelfKicked;
             }
-            this.RaiseEvent(handler, e);
+            RaiseEvent(handler, e);
         }
 
         private void OnMode(IrcMessage message)
@@ -1022,21 +1017,21 @@ namespace CobaltCore.Irc
             {
                 if (IrcTarget.IsChannelName(message.Parameters[0]))
                 {
-                    this.RaiseEvent(this.ChannelModeChanged, new IrcChannelModeEventArgs(message));
+                    RaiseEvent(ChannelModeChanged, new IrcChannelModeEventArgs(message));
                 }
                 else
                 {
                     var e = new IrcUserModeEventArgs(message);
-                    this.UserModes = (from m in e.Modes.Where((newMode) => newMode.Set).Select((newMode) => newMode.Mode).Union(this.UserModes).Distinct()
-                                      where !e.Modes.Any((newMode) => !newMode.Set && newMode.Mode == m)
+                    UserModes = (from m in e.Modes.Where(newMode => newMode.Set).Select(newMode => newMode.Mode).Union(UserModes).Distinct()
+                                      where !e.Modes.Any(newMode => !newMode.Set && newMode.Mode == m)
                                       select m).ToArray();
 
-                    this.RaiseEvent(this.UserModeChanged, new IrcUserModeEventArgs(message));
+                    RaiseEvent(UserModeChanged, new IrcUserModeEventArgs(message));
                 }
             }
         }
 
-        private void OnOther(IrcMessage message)
+        private async Task OnOther(IrcMessage message)
         {
             int code;
             if (int.TryParse(message.Command, out code))
@@ -1047,21 +1042,20 @@ namespace CobaltCore.Irc
                     if (e.Text.StartsWith("Welcome to the "))
                     {
                         var parts = e.Text.Split(' ');
-                        this.NetworkName = parts[3];
+                        NetworkName = parts[3];
                     }
-                    this.State = IrcConnectionState.Connected;
+                    State = IrcConnectionState.Connected;
                 }
 
                 if (_captures.Count > 0)
                 {
-                    lock (_captures)
-                    {
                         var capturesToRemove = new List<IrcCodeHandler>();
-                        foreach (var capture in _captures.Where((c) => c.Codes.Contains(e.Code)))
+                        foreach (var capture in _captures.Where(c => c.Codes.Contains(e.Code)))
                         {
                             if (capture != null)
                             {
-                                if (capture.Handler(e))
+                                bool result = await capture.Handler(e).ConfigureAwait(false);
+                                if (result)
                                 {
                                     // if it returns true remove the handler
                                     capturesToRemove.Add(capture);
@@ -1073,15 +1067,15 @@ namespace CobaltCore.Irc
                             }
                         }
                         _captures = _captures.Except(capturesToRemove).ToList();
-                    }
                 }
-                this.RaiseEvent(this.InfoReceived, e);
+
+                RaiseEvent(InfoReceived, e);
             }
         }
 
         private void OnCtcpCommand(IrcMessage message)
         {
-            this.RaiseEvent(this.CtcpCommandReceived, new CtcpEventArgs(message));
+            RaiseEvent(CtcpCommandReceived, new CtcpEventArgs(message));
         }
     }
 }
