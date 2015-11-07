@@ -114,14 +114,14 @@ namespace CobaltCore.Irc
         /// Gets the internal IP address of the computer running the session. This is the private IP address that is used behind
         /// a NAT firewall.
         /// </summary>
-        public IPAddress InternalAddress { get; private set; }
+        public IPAddress InternalAddress { [UsedImplicitly] get; private set; }
 
         /// <summary>
         /// Gets the external IP address of the computer running the session. The IRC server is queried to retrieve the address or hostname.
         /// If a hostname is returned, the IP address is retrieved via DNS. If no external address can be found, the local IP address
         /// is provided.
         /// </summary>
-        public IPAddress ExternalAddress { get; private set; }
+        public IPAddress ExternalAddress { [UsedImplicitly] get; private set; }
 
         /// <summary>
         /// Gets or sets proxy information, identifying the SOCKS5 proxy server to use when connecting to a server.

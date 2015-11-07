@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cobalt.CobaltCore;
 
 namespace CobaltCore.Irc
 {
@@ -26,6 +27,8 @@ namespace CobaltCore.Irc
 
             if (!string.IsNullOrEmpty(Proxy?.ProxyHostname))
             {
+                var proxy = new SocksTcpClient(Proxy);
+                _tcpClient = await proxy.ConnectAsync(Hostname, Port);
             }
             else
             {
@@ -52,7 +55,7 @@ namespace CobaltCore.Irc
                     await Socket_OnConnected();
                 }
             }
-            catch (Exception e)
+            catch (SocksException e)
             {
                 OnConnectionError(new ErrorEventArgs(e));
             }
@@ -106,14 +109,12 @@ namespace CobaltCore.Irc
                 catch (SocketException ex)
                 {
                     OnConnectionError(new ErrorEventArgs(ex));
-                }
+                }                
                 finally
                 {
                     Close();
                 }
-#warning Add SocksException
-            }, _wtoken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
+            }, _wtoken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);            
         }
 
         private async Task SocketLoopAsync(CancellationToken ct)
