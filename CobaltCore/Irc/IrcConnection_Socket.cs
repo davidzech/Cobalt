@@ -131,7 +131,7 @@ namespace CobaltCore.Irc
                     }
                     else if (completed == readTask)
                     {
-                        var read = readTask.Result;
+                        var read = await readTask;
                         if (read == 0)
                         {
                             // 0 bytes mean socket close
@@ -189,8 +189,8 @@ namespace CobaltCore.Irc
                     await _stream.WriteAsync(writeBuffer, 0, count + 2, _wtoken.Token).ConfigureAwait(false);
                 }
                 catch (Exception e)
-                {
-                    Console.WriteLine("WriteAsync failed " + e);
+                {                    
+                    OnConnectionError(new ErrorEventArgs(e));
                 }
             }
         }

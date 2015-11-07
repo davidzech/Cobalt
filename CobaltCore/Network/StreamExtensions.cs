@@ -13,7 +13,7 @@ namespace CobaltCore.Network
         {
             byte[] buf = new byte[1];
             buf[0] = value;
-            await stream.WriteAsync(buf, 0, 1).ConfigureAwait(false));            
+            await stream.WriteAsync(buf, 0, 1).ConfigureAwait(false);            
         }       
     }
 }

@@ -57,6 +57,7 @@
     <Compile Include="Network\NatHelper.cs" />
     <Compile Include="Network\ProxyInfo.cs" />
     <Compile Include="Network\SocksTcpClient.cs" />
+    <Compile Include="Network\StreamExtensions.cs" />
     <Compile Include="Network\StunUdpClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
