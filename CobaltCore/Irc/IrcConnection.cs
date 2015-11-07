@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CobaltCore.Ctcp;
 using CobaltCore.Network;
+using JetBrains.Annotations;
 
 namespace CobaltCore.Irc
 {
@@ -48,7 +49,7 @@ namespace CobaltCore.Irc
         private bool _isWaitingForActivity;
         private bool _findExternalAddress;
         private Timer _reconnectTimer;
-        private Task _socketLoopTask;
+       // private Task _socketLoopTask;
         private CancellationTokenSource _wtoken;
         private TcpClient _tcpClient;
 
@@ -67,10 +68,10 @@ namespace CobaltCore.Irc
 
         /// </summary>
 
-        /// <summary>
+        /// <summary/>
         public bool IsSecure { get; private set; }
         /// Gets a value that determines whether or not the connection should allow insecure TLS Connections
-        /// </summary>
+        /// 
         public bool AcceptInsecureCertificate => true;
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace CobaltCore.Irc
         /// Gets the name of the IRC network to which the client is connected. By default, this will simply be the server name but
         /// may be updated when the network name is determined.
         /// </summary>
-        public string NetworkName { get; private set; }
+        public string NetworkName { [UsedImplicitly] get; private set; }
 
         /// <summary>
         /// Gets the current set of user modes that apply to the session.
@@ -275,13 +276,14 @@ namespace CobaltCore.Irc
         /// <param name="password">The optional password to supply while logging in.</param>
         /// <param name="invisible">Determines whether the +i flag will be set by default.</param>
         /// <param name="findExternalAddress">Determines whether to find the external IP address by querying the IRC server upon connect.</param>
+        /// <param name="proxy">Socks Proxy Info</param>
         public async Task ConnectAsync(string hostname, int port, bool isSecure, string nickname,
             string userName, string fullname, bool autoReconnect, string password = null, bool invisible = false, bool findExternalAddress = true,
             ProxyInfo proxy = null)
         {
             if (string.IsNullOrEmpty(nickname))
             {
-                throw new ArgumentNullException("Nickname");
+                throw new ArgumentNullException(nameof(nickname));
             }
             _password = password;
             _isInvisible = invisible;
@@ -475,6 +477,7 @@ namespace CobaltCore.Irc
         /// Part (leave) a channel.
         /// </summary>
         /// <param name="channel">The channel to leave.</param>
+        /// <param name="message"></param>
         public async Task PartAsync(string channel, string message = null)
         {
             if (message != null)
@@ -572,9 +575,11 @@ namespace CobaltCore.Irc
         /// <summary>
         /// Retrieve information about a user.
         /// </summary>
-        /// <param name="target">The sever to which the request should be routed (or the nickname of the user to route the request to
-        /// his server).</param>
-        /// <param name="target">The nickname of the user to retrieve information about. Wildcards may or may not be supported.</param>
+        /// <param name="target">
+        ///     The sever to which the request should be routed (or the nickname of the user to route the request to his server).
+        ///     The nickname of the user to retrieve information about. Wildcards may or may not be supported.
+        /// </param>
+        /// <param name="mask">The mask to whois</param>
         public async Task WhoisAsync(string target, string mask)
         {
             await SendAsync("WHOIS", target, mask);
@@ -622,13 +627,14 @@ namespace CobaltCore.Irc
         /// <param name="modes">The list modes to set or unset.</param>
         public async Task ModeAsync(string channel, IEnumerable<IrcChannelMode> modes)
         {
-            if (!modes.Any())
+            var ircChannelModes = modes as IList<IrcChannelMode> ?? modes.ToList();
+            if (!ircChannelModes.Any())
             {
                 await SendAsync("MODE", new IrcTarget(channel));
                 return;
             }
 
-            var enumerator = modes.GetEnumerator();
+            var enumerator = ircChannelModes.GetEnumerator();
             var modeChunk = new List<IrcChannelMode>();
             int i = 0;
             while (enumerator.MoveNext())
@@ -767,7 +773,7 @@ namespace CobaltCore.Irc
             {
                 await QuitAsync("Reconnecting...");
             }
-            OnReconnect();
+            await OnReconnect();
         }
 
         private void RaiseEvent<T>(EventHandler<T> evt, T e) where T : EventArgs
@@ -817,21 +823,18 @@ namespace CobaltCore.Irc
                         }
                     }
                     return true;
-                }, IrcCode.RPL_USERHOST));
+                }, IrcCodeHandlerPriority.Normal, IrcCode.RPL_USERHOST));
                 await UserHostAsync(Nickname);
             }
 
             RaiseEvent(StateChanged, EventArgs.Empty);
 
             if (State == IrcConnectionState.Disconnected && AutoReconnect && ForceDisconnect != true)
-            {                
-                if (_reconnectTimer != null)
+            {
+                _reconnectTimer?.Dispose();
+                _reconnectTimer = new Timer(async obj =>
                 {
-                    _reconnectTimer.Dispose();
-                }
-                _reconnectTimer = new Timer(obj =>
-                {
-                    OnReconnect();
+                    await OnReconnect();
                 }, null, ReconnectWaitTime, Timeout.Infinite);
             }
         }
@@ -915,10 +918,10 @@ namespace CobaltCore.Irc
             }
         }
 
+        [UsedImplicitly]
         private void OnMessageSent(IrcEventArgs e)
         {
             RaiseEvent(RawMessageSent, e);
-
 #if DEBUG
             if (Debugger.IsAttached)
             {
@@ -1049,27 +1052,31 @@ namespace CobaltCore.Irc
 
                 if (_captures.Count > 0)
                 {
-                        var capturesToRemove = new List<IrcCodeHandler>();
-                        foreach (var capture in _captures.Where(c => c.Codes.Contains(e.Code)))
+                    var capturesToRemove = new List<IrcCodeHandler>();
+                    List<IrcCodeHandler> copy;
+                    lock (_captures)
+                    {
+                        copy = _captures.ToList();
+                    }
+                    foreach (var capture in copy.Where(c => c.Codes.Contains(e.Code)))
+                    {
+                        bool result = await capture.Handler(e).ConfigureAwait(false);
+                        if (result)
                         {
-                            if (capture != null)
-                            {
-                                bool result = await capture.Handler(e).ConfigureAwait(false);
-                                if (result)
-                                {
-                                    // if it returns true remove the handler
-                                    capturesToRemove.Add(capture);
-                                }
-                                if (e.Handled)
-                                {
-                                    break; // if its handled stop processing
-                                }
-                            }
+                            // if it returns true remove the handler
+                            capturesToRemove.Add(capture);
                         }
+                        if (e.Handled)
+                        {
+                            break; // if its handled stop processing
+                        }
+                    }
+                    lock (_captures)
+                    {
                         _captures = _captures.Except(capturesToRemove).ToList();
-                }
-
-                RaiseEvent(InfoReceived, e);
+                    }
+               }
+            RaiseEvent(InfoReceived, e);
             }
         }
 

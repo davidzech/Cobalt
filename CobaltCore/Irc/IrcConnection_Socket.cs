@@ -89,8 +89,12 @@ namespace CobaltCore.Irc
                 await sslStream.AuthenticateAsClientAsync(Hostname).ConfigureAwait(false);
                 _stream = sslStream;
             }
-            _socketLoopTask = Task.Run(async () =>
+
+
+            TaskFactory f = new TaskFactory();
+            await f.StartNew(async () =>
             {
+                await Task.Yield(); // yield to fire and forget
                 try
                 {
                     await SocketLoopAsync(ct).ConfigureAwait(false);
@@ -108,7 +112,7 @@ namespace CobaltCore.Irc
                     Close();
                 }
 #warning Add SocksException
-            }, _wtoken.Token);
+            }, _wtoken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         }
 

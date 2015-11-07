@@ -1,8 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace CobaltCore.Irc
 {
+    public enum IrcCodeHandlerPriority
+    {
+        Lowest = 0,
+        Low = 1,
+        Normal = 2,
+        High = 3,
+        Highest = 4
+    }
+
 	/// <summary>
 	/// This class represents a handler for a specific IRC code value. It can be used to "intercept" a response
 	/// to a command and prevent other components from processing it.
@@ -11,18 +21,19 @@ namespace CobaltCore.Irc
 	{
 		internal IrcCode[] Codes { get; private set; }
 		internal Func<IrcInfoEventArgs, Task<bool>> Handler { get; private set; }
+        internal IrcCodeHandlerPriority Priority { [UsedImplicitly] get; private set; }
 
-		/// <summary>
-		/// Primary constructor.
-		/// </summary>
-		/// <param name="code">The IRC code to handle.</param>
-		/// <param name="autoRemove">Whether to automatically remove the handler after first invocation.</param>
-		/// <param name="handler">The function to handle the message. If the function returns true, the handler is removed.</param>
-		/// <param name="errorHandler">The function to handle an error response. If the function returns true, the handler is removed.</param>
-		public IrcCodeHandler(Func<IrcInfoEventArgs, Task<bool>> handler, params IrcCode[] codes)
+        /// <summary>
+        /// Primary Constructor
+        /// </summary>
+        /// <param name="handler">Code Handler to handle the stuff.</param>
+        /// <param name="priority"></param>
+        /// <param name="codes"></param>
+		public IrcCodeHandler(Func<IrcInfoEventArgs, Task<bool>> handler, IrcCodeHandlerPriority priority, params IrcCode[] codes)
 		{
-			this.Handler = handler;
-			this.Codes = codes;
+			Handler = handler;
+			Codes = codes;
+		    Priority = priority;
 		}
 	}
 }
