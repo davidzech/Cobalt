@@ -74,7 +74,7 @@ namespace CobaltCore.Irc
             _stream = _tcpClient.GetStream();
             if (IsSecure)
             {
-                var sslStream = new SslStream(_stream, true, (sender, cert, chain, sslPolicyErrors) =>
+                var sslStream = new SslStream(_stream, true, (sender, cert, chain, sslPolicyErrors) =>                
                 {
                     if (!AcceptInsecureCertificate)
                     {

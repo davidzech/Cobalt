@@ -310,6 +310,7 @@ namespace CobaltCore.Irc
         public void Dispose()
         {
             _tcpClient?.Close();
+            _stream?.Dispose();
         }
 
         /// <summary>
