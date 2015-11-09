@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
 	/// <summary>
 	/// Represents an abstract IRC prefix which could refer to either a user or a server.

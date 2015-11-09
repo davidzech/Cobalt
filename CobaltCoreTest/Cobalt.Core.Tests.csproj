@@ -6,8 +6,8 @@
     <ProjectGuid>{83D3A2E6-A0CF-48B8-A895-93C2F541A116}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CobaltCoreTest</RootNamespace>
-    <AssemblyName>CobaltCoreTest</AssemblyName>
+    <RootNamespace>Cobalt.Core.Tests</RootNamespace>
+    <AssemblyName>Cobalt.Core.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CobaltCore\CobaltCore.csproj">
+    <ProjectReference Include="..\CobaltCore\Cobalt.Core.csproj">
       <Project>{b559cbd0-1cf2-4467-92ae-7492922a0e23}</Project>
-      <Name>CobaltCore</Name>
+      <Name>Cobalt.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

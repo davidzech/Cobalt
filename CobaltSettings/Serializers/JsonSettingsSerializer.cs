@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using CobaltSettings.Elements;
+using Cobalt.Settings.Elements;
 using Newtonsoft.Json;
 
-namespace CobaltSettings.Serializers
+namespace Cobalt.Settings.Serializers
 {
     internal class JsonSettingsSerializer : ISettingsSerializer
     {

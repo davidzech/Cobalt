@@ -12,16 +12,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using CobaltCore.Irc;
 
-namespace Cobalt
+namespace Cobalt.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for IrcTabView.xaml
     /// </summary>
-    public partial class MainWindow
+    public partial class IrcTabView : UserControl
     {
-        public MainWindow()
+        public IrcTabView()
         {
             InitializeComponent();
         }

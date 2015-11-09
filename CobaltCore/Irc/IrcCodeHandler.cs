@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
     public enum IrcCodeHandlerPriority
     {

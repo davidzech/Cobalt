@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CobaltSettings.Annotations;
 
-namespace CobaltSettings.Elements
+namespace Cobalt.Settings.Elements
 {
     [Serializable]    
     public class UserProfileElement : INotifyPropertyChanged

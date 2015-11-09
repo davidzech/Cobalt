@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cobalt.CobaltCore;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
     public partial class IrcConnection
     {

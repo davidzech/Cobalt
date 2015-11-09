@@ -7,8 +7,8 @@
     <ProjectGuid>{B559CBD0-1CF2-4467-92AE-7492922A0E23}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CobaltCore</RootNamespace>
-    <AssemblyName>CobaltCore</AssemblyName>
+    <RootNamespace>Cobalt.Core</RootNamespace>
+    <AssemblyName>Cobalt.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
 	/// <summary>
 	/// Provides event arguments describing an IRC event.

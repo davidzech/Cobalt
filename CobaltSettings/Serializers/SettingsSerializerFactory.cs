@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CobaltSettings.Serializers
+namespace Cobalt.Settings.Serializers
 {
     public static class SettingsSerializerFactory
     {

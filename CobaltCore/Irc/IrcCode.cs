@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
 	/// <summary>
 	/// An enumeration of all standard three-digit codes that may be sent from an IRC server to the client, typically

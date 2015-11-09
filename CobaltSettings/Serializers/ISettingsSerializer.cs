@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using CobaltSettings.Elements;
+using Cobalt.Settings.Elements;
 
-namespace CobaltSettings.Serializers
+namespace Cobalt.Settings.Serializers
 {
     public interface ISettingsSerializer
     {

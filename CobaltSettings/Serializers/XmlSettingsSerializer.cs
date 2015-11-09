@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using CobaltSettings.Elements;
+using Cobalt.Settings.Elements;
 
-namespace CobaltSettings.Serializers
+namespace Cobalt.Settings.Serializers
 {
     internal class XmlSettingsSerializer : ISettingsSerializer
     {

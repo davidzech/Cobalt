@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
 	/// <summary>
 	/// Represents a single IRC user mode change and provides utility functions for converting collections of modes to a textual

@@ -1,5 +1,5 @@
 ﻿using System;
-using CobaltCore.Irc;
+using Cobalt.Core.Irc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Runtime.Remoting.Channels;
 using System.Threading;
 using CobaltCore.Ctcp;
 
-namespace CobaltCoreTest
+namespace Cobalt.Core.Tests
 {
     [TestClass]
     public class IrcConnectionTest

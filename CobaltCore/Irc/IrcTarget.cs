@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
 	/// <summary>
 	/// Represents a target to which a message may be sent.

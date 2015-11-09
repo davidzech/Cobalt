@@ -10,7 +10,7 @@ using CobaltCore.Ctcp;
 using CobaltCore.Network;
 using JetBrains.Annotations;
 
-namespace CobaltCore.Irc
+namespace Cobalt.Core.Irc
 {
     /// <summary>
     /// Describes all possible states of an IrcSession object.

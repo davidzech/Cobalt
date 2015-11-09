@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using CobaltSettings.Elements;
-using CobaltSettings.Serializers;
+using Cobalt.Settings.Elements;
+using Cobalt.Settings.Serializers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CobaltSettingsTests
