@@ -16,33 +16,34 @@ namespace Cobalt.ViewModels
 {    
 
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class MainViewModel : PropertyChangedBase, IParent<IrcTabViewModel>, IDragSource, IDropTarget
+    public class MainViewModel : Conductor<IrcTabViewModel>, IDragSource, IDropTarget
     {
 
-        private readonly BindableCollection<IrcTabViewModel> _channels = new BindableCollection<IrcTabViewModel>();
+        private readonly BindableCollection<IrcTabViewModel> _tabs = new BindableCollection<IrcTabViewModel>();
         public MainViewModel()
         {
+            this.Activated += MainViewModel_Activated;
+            _tabs.CollectionChanged += _tabs_CollectionChanged;
+        }
+
+        private void _tabs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyOfPropertyChange(() => this.NewTabInstructionsVisible);
+        }
+
+        private async void MainViewModel_Activated(object sender, ActivationEventArgs e)
+        {
+            await Task.Yield();
             var tab = new IrcTabViewModel() { DisplayName = "Root" };
             tab.AddChild(new IrcTabViewModel() { DisplayName = "Child" });
-            tab.AddChild(new IrcTabViewModel() { DisplayName = "Child2"});
-            _channels.Add(tab);
+            tab.AddChild(new IrcTabViewModel() { DisplayName = "Child2" });
+            ActivateItem(tab);
             tab = new IrcTabViewModel() { DisplayName = "Root2" };
-            _channels.Add(tab);
+            tab.AddChild(new IrcTabViewModel() {DisplayName = "2Child"});
+            ActivateItem(tab);
         }
 
-        public IObservableCollection<IrcTabViewModel> Channels => _channels;
-
-
-        IrcTabViewModel _activeItem;
-        public IrcTabViewModel ActiveItem
-        {
-            get { return _activeItem; }
-            set
-            {
-                _activeItem = value;
-                NotifyOfPropertyChange();
-            }
-        }
+        public IObservableCollection<IrcTabViewModel> Tabs => _tabs;
 
         public bool CanJoinChannel()
         {            
@@ -50,19 +51,10 @@ namespace Cobalt.ViewModels
         }
         public void JoinChannel()
         {
-            MessageBox.Show("HELLO");
+            ActivateItem(new IrcTabViewModel() {DisplayName = "Button"});
         }
 
-        public bool NewTabInstructionsVisible => Channels.Count == 0;
-        public IEnumerable<IrcTabViewModel> GetChildren()
-        {
-            return Channels;
-        }
-
-        IEnumerable IParent.GetChildren()
-        {
-            return Channels;
-        }
+        public bool NewTabInstructionsVisible => Tabs.Count == 0;
 
         public void StartDrag(IDragInfo dragInfo)
         {
@@ -86,14 +78,74 @@ namespace Cobalt.ViewModels
 
         public void DragOver(IDropInfo dropInfo)
         {
-            dropInfo.DestinationText = "TEST";
             var source = dropInfo.DragInfo.SourceItem as IrcTabViewModel;
             var target = dropInfo.TargetItem as IrcTabViewModel;
-            if (target != source && target?.IsChannel == source?.IsChannel && !dropInfo.InsertPosition.HasFlag(RelativeInsertPosition.TargetItemCenter))
-            {
-                DragDrop.DefaultDropHandler.DragOver(dropInfo);
-            }
+            if (source == null || target == null)
+                return;
 
+            if (target != source && target.IsChannel == source.IsChannel && !dropInfo.InsertPosition.HasFlag(RelativeInsertPosition.TargetItemCenter))
+            {
+                if (source.IsChannel)
+                {
+                    if (target.IsChannel && source.ParentTab == target.ParentTab)
+                    {
+                        DragDrop.DefaultDropHandler.DragOver(dropInfo);
+                    }
+                }
+                else
+                {
+                    DragDrop.DefaultDropHandler.DragOver(dropInfo);
+                }
+            }
+        }
+
+        public override void ActivateItem(IrcTabViewModel item)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            if (item.IsChannel)
+            {
+                base.ActivateItem(item);
+            }
+            else
+            {
+                foreach (var chan in item.Children)
+                {
+                    base.EnsureItem(chan);
+                }
+                if(!Tabs.Contains(item))
+                    Tabs.Add(item);
+                base.ActivateItem(item);
+            }
+        }
+
+        public override void DeactivateItem(IrcTabViewModel item, bool close)
+        {
+            if (close)
+            {
+                if (item.IsChannel)
+                {
+                    var parent = Tabs.First(s => s == item.ParentTab);
+                    parent.Children.Remove(item);
+                }
+                else
+                {
+                    foreach (var child in item.Children)
+                    {
+                        base.DeactivateItem(child, true);
+                    }
+                    Tabs.Remove(item);
+                }
+                ActivateItem(DetermineNextItem(item));
+            }
+            base.DeactivateItem(item, close);
+        }
+
+        private IrcTabViewModel DetermineNextItem(IrcTabViewModel removed)
+        {
+            return removed?.ParentTab;
         }
 
         public void Drop(IDropInfo dropInfo)

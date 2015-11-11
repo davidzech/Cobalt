@@ -99,7 +99,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\BindableSelectedItemBehavior.cs" />
-    <Compile Include="Behaviors\SelectOnMouseUpBehavior.cs" />
     <Compile Include="CobaltBootstrapper.cs" />
     <Compile Include="ViewModels\IrcTabViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />

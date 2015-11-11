@@ -16,7 +16,8 @@
         GlowBrush="{DynamicResource AccentColorBrush}"
         NonActiveGlowBrush="{DynamicResource NonActiveGlowBrush}"
         NonActiveBorderBrush="Transparent"
-        Style="{DynamicResource CleanWindowStyleKey}">
+        Style="{DynamicResource CleanWindowStyleKey}"
+        cal:Bind.AtDesignTime="True">
     <controls:MetroWindow.TitleTemplate>
         <DataTemplate>
         </DataTemplate>
@@ -35,12 +36,16 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <Grid.Resources>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </Grid.Resources>
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource GrayBrush5}" FontSize="24" Text="Press CTRL + T to Open a New Tab"
                    Visibility="{Binding NewTabInstructionsVisible, Converter={StaticResource BoolToVis}}"/>
-        <Grid>
+        <Grid Grid.Row="0">
             <Grid.Resources>
                 <BooleanToVisibilityConverter x:Key="BoolToVis"/>
             </Grid.Resources>
@@ -49,25 +54,33 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*" MinWidth="200"/>
             </Grid.ColumnDefinitions>
-            <TreeView Focusable="False" x:Name="Channels" Grid.Column="0" FocusVisualStyle="{x:Null}" 
+            <TreeView  Focusable="False" x:Name="Tabs" Grid.Column="0" FocusVisualStyle="{x:Null}"  d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
                       dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
                       dd:DragDrop.DragHandler="{Binding}" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultDragAdorner="True">
                 <i:Interaction.Behaviors>
                     <b:BindableSelectedItemBehavior SelectedItem="{Binding ActiveItem, Mode=TwoWay}"/>
                 </i:Interaction.Behaviors>
                 <TreeView.Resources>
-                    <ContextMenu x:Key="ChannelListContextMenu">
-                        <MenuItem Header="Header"/>
+                    <ContextMenu x:Key="ChannelListContextMenu" d:DataContext="{d:DesignInstance Type=vm:IrcTabViewModel}"  cal:Action.TargetWithoutContext="{Binding}">
+                        <MenuItem  Header="{Binding DisplayName}"/>
                         <Separator/>
-                        <MenuItem Header="Autojoin"  IsCheckable="True"/>
-                        <MenuItem Header="Disconnect"  />
-                        <MenuItem Header="Reconnect" />
-                        <MenuItem Header="Close" CommandParameter="{Binding}"/>
+                        <MenuItem Header="Autojoin" IsCheckable="True" IsChecked="{Binding AutoJoin, Mode=TwoWay}" Visibility="{Binding IsChannel, Converter={StaticResource BoolToVis}}" />
+                        <MenuItem Header="Disconnect" Visibility="{Binding IsServer, Converter={StaticResource BoolToVis}}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <cal:ActionMessage MethodName="Disconnect"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </MenuItem>
+                        <MenuItem Header="Reconnect"  Visibility="{Binding IsServer, Converter={StaticResource BoolToVis}}" cal:Message.Attach="Reconnect">
+                        </MenuItem>
+                        <MenuItem Header="Close" cal:Message.Attach="Close()">
+                        </MenuItem>
                     </ContextMenu>
                 </TreeView.Resources>
                 <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}" d:DataContext="{d:DesignInstance Type=vm:IrcTabViewModel}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"  />
                         <Setter Property="AllowDrop" Value="True"/>
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                         <Setter Property="FontWeight" Value="Normal" />
@@ -88,5 +101,6 @@
             <GridSplitter IsTabStop="False" Grid.Column="1" Panel.ZIndex="1000" BorderThickness="3 0 3 0" Width="7" BorderBrush="Transparent" Background="Transparent" Margin="-3 0 -3 0" HorizontalAlignment="Stretch" />
             <controls:TransitioningContentControl x:Name="ActiveItem" Grid.Column="2" Transition="Left" Margin="0 0 0 5" cal:Bind.Model="{Binding}"/>
         </Grid>
+        <StatusBar Grid.Row="1" Background="{DynamicResource AccentColorBrush}" Height="22" VerticalAlignment="Bottom"/>
     </Grid>
 </controls:MetroWindow>
