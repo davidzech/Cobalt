@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CobaltCore\Cobalt.Core.csproj">
+    <ProjectReference Include="..\Cobalt.Core\Cobalt.Core.csproj">
       <Project>{b559cbd0-1cf2-4467-92ae-7492922a0e23}</Project>
       <Name>Cobalt.Core</Name>
     </ProjectReference>

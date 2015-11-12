@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CobaltCore.Ctcp;
-using CobaltCore.Network;
+using Cobalt.Core.Network;
 using JetBrains.Annotations;
 
 namespace Cobalt.Core.Irc

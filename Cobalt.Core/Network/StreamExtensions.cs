@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CobaltCore.Network
+namespace Cobalt.Core.Network
 {
     public static class StreamExtensions
     {

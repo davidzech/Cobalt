@@ -10,7 +10,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
-namespace CobaltCore.Network
+namespace Cobalt.Core.Network
 {
 	/// <summary>
 	/// A utility class to assist with NAT traversal; specifically, ports may be forwarded through a NAT router to support inbound connections. This class uses UPnP.

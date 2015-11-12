@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using CobaltCore.Network;
 using MahApps.Metro;
 
 namespace Cobalt

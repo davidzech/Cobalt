@@ -198,12 +198,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CobaltCore\Cobalt.Core.csproj">
-      <Project>{B559CBD0-1CF2-4467-92AE-7492922A0E23}</Project>
-      <Name>Cobalt.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\WindowsIcons-license.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -221,7 +215,12 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Cobalt.Core\Cobalt.Core.csproj">
+      <Project>{B559CBD0-1CF2-4467-92AE-7492922A0E23}</Project>
+      <Name>Cobalt.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

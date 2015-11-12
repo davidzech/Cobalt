@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Cobalt.ViewModels;
-using CobaltCore.Network;
 using Caliburn.Micro;
+using Cobalt.Core.Network;
 using Cobalt.Extensibility;
 using ThemeManager = MahApps.Metro.ThemeManager;
 

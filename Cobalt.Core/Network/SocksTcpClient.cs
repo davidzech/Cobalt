@@ -3,9 +3,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CobaltCore.Network;
 
-namespace Cobalt.CobaltCore
+namespace Cobalt.Core.Network
 {
 	#region SocksException class
 	[Serializable]

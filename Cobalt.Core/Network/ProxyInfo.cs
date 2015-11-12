@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CobaltCore.Network
+namespace Cobalt.Core.Network
 {
 	/// <summary>
 	/// This class represents information that is used to connect to a SOCKS5 proxy server.

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Cobalt.CobaltCore
+namespace Cobalt.Core.Network
 {
 	/// <summary>
 	/// Encapsulates a STUN-related error.

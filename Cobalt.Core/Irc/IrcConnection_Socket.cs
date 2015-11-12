@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Cobalt.CobaltCore;
+using Cobalt.Core.Network;
 
 namespace Cobalt.Core.Irc
 {
