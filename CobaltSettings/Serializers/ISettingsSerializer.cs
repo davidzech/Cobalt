@@ -12,5 +12,7 @@ namespace Cobalt.Settings.Serializers
         SettingsElement Deserialize(string data);
 
         Task<SettingsElement> DeserializeAsync(string filePath);
+
+        string GetFileExtension();
     }
 }

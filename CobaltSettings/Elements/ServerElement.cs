@@ -9,7 +9,7 @@ namespace Cobalt.Settings.Elements
     [Serializable]
     public sealed class ServerElement : INotifyPropertyChanged
     {
-        private string _name;
+        private string _name = "";
         public string Name
         {
             get
@@ -26,7 +26,22 @@ namespace Cobalt.Settings.Elements
             }
         }
 
-        private int _port;
+        private string _hostname = "";
+
+        public string Hostname
+        {
+            get { return _hostname; }
+            set
+            {
+                if (_hostname != value)
+                {
+                    _hostname = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private int _port = 6667;
 
         public int Port
         {

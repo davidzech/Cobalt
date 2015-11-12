@@ -55,6 +55,10 @@ namespace Cobalt.Core.Irc
                     await Socket_OnConnected();
                 }
             }
+            catch (SocketException e)
+            {
+                OnConnectionError(new ErrorEventArgs(e));
+            }
             catch (SocksException e)
             {
                 OnConnectionError(new ErrorEventArgs(e));

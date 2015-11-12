@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cobalt.Core.Tests", "Cobalt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cobalt", "Cobalt\Cobalt.csproj", "{F212A256-1951-4F73-A820-FD6D35C353DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CobaltSettings", "CobaltSettings\CobaltSettings.csproj", "{3379F3CF-F01A-4526-8BE9-E419418F3BE6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cobalt.Settings", "CobaltSettings\Cobalt.Settings.csproj", "{3379F3CF-F01A-4526-8BE9-E419418F3BE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CobaltSettingsTests", "CobaltSettingsTests\CobaltSettingsTests.csproj", "{72F94637-F7AC-4D5C-9C9F-A3C2F5B0298C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cobalt.Settings.Tests", "CobaltSettingsTests\Cobalt.Settings.Tests.csproj", "{72F94637-F7AC-4D5C-9C9F-A3C2F5B0298C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cobalt.Tests", "Cobalt.Tests\Cobalt.Tests.csproj", "{E9E58808-D45B-4E46-B261-0E3DDC453D5F}"
 EndProject

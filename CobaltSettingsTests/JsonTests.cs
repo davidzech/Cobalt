@@ -3,7 +3,7 @@ using Cobalt.Settings.Elements;
 using Cobalt.Settings.Serializers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CobaltSettingsTests
+namespace Cobalt.Settings.Tests
 {
     [TestClass]
     public class JsonTests
@@ -38,8 +38,7 @@ namespace CobaltSettingsTests
         }
 
         private static readonly string Expected =
-            "{\"FontFamily\":\"Segoe UI\",\"FontSize\":14,\"ScrollbackLines\":300,\"DefaultProfile\":{\"Nickname1\":\"Nick1\",\"Nickname2\":null,\"Nickname3\":null,\"Username\":\"Username\",\"FullName\":\"FullName\",\"NickservPassword\":null},\"Servers\":[{\"Name\":\"Memers\",\"Port\":6667,\"Password\":null,\"Channels\":[],\"IsSecure\":false,\"ConnectOnStartup\":false,\"AutoReconnect\":false,\"ProfileOverride\":{\"Nickname1\":\"Override\",\"Nickname2\":null,\"Nickname3\":null,\"Username\":\"Override\",\"FullName\":\"Override\",\"NickservPassword\":null}}]}";
-
+            "{\"FontFamily\":\"Segoe UI\",\"FontSize\":14,\"ScrollbackLines\":300,\"DefaultProfile\":{\"Nickname1\":\"Nick1\",\"Nickname2\":null,\"Nickname3\":null,\"Username\":\"Username\",\"FullName\":\"FullName\",\"NickservPassword\":null},\"Servers\":[{\"Name\":\"Memers\",\"Hostname\":\"\",\"Port\":6667,\"Password\":null,\"Channels\":[],\"IsSecure\":false,\"ConnectOnStartup\":false,\"AutoReconnect\":false,\"ProfileOverride\":{\"Nickname1\":\"Override\",\"Nickname2\":null,\"Nickname3\":null,\"Username\":\"Override\",\"FullName\":\"Override\",\"NickservPassword\":null}}]}";
         [TestMethod]
         public void TestSerialize()
         {

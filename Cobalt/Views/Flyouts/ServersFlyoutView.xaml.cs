@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Cobalt.Views
+namespace Cobalt.Views.Flyouts
 {
     /// <summary>
-    /// Interaction logic for MainView.xaml
+    /// Interaction logic for ServersFlyoutView.xaml
     /// </summary>
-    public partial class MainView 
+    public partial class ServersFlyoutView : UserControl
     {
-        public MainView()
+        public ServersFlyoutView()
         {
             InitializeComponent();
         }

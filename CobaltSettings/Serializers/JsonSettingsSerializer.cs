@@ -25,5 +25,10 @@ namespace Cobalt.Settings.Serializers
         {
             return await Task.Run(() => Deserialize(data));
         }
+
+        public string GetFileExtension()
+        {
+            return "json";
+        }
     }
 }

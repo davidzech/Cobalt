@@ -50,7 +50,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Cobalt.App</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
@@ -74,6 +75,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -100,13 +102,39 @@
     </ApplicationDefinition>
     <Compile Include="Behaviors\BindableSelectedItemBehavior.cs" />
     <Compile Include="CobaltBootstrapper.cs" />
+    <Compile Include="Extensibility\CobaltWindowManager.cs" />
+    <Compile Include="Extensibility\IThemeManager.cs" />
+    <Compile Include="Extensibility\IViewLocator.cs" />
+    <Compile Include="Extensibility\MetroBootstrapper.cs" />
+    <Compile Include="Extensibility\MetroWindowManager.cs" />
+    <Compile Include="Extensibility\StartupTasks.cs" />
+    <Compile Include="Extensibility\ThemeManager.cs" />
+    <Compile Include="Extensibility\ViewLocator.cs" />
+    <Compile Include="ViewModels\IShell.cs" />
+    <Compile Include="Services\IServiceLocator.cs" />
+    <Compile Include="Services\MefServiceLocator.cs" />
+    <Compile Include="ViewModels\Flyouts\FlyoutViewModelBase.cs" />
+    <Compile Include="ViewModels\Flyouts\IFlyout.cs" />
+    <Compile Include="ViewModels\Flyouts\ServersFlyoutViewModel.cs" />
     <Compile Include="ViewModels\IrcTabViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Page Include="Themes\CobaltMetro.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Flyouts\ServersFlyoutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\IrcTabView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ShellView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -114,11 +142,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Views\Flyouts\ServersFlyoutView.xaml.cs">
+      <DependentUpon>ServersFlyoutView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\IrcTabView.xaml.cs">
       <DependentUpon>IrcTabView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShellView.xaml.cs">
+      <DependentUpon>ShellView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Resources\Icons.xaml">
@@ -187,6 +221,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -35,5 +35,10 @@ namespace Cobalt.Settings.Serializers
         {
             throw new NotImplementedException();
         }
+
+        public string GetFileExtension()
+        {
+            return "xml";
+        }
     }
 }

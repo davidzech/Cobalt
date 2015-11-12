@@ -16,7 +16,6 @@ namespace Cobalt.ViewModels
 
         public void AddChild(IrcTabViewModel child)
         {
-            this.DeactivateWith(child);
             child.ParentTab = this;
             Children.Add(child);
         }
