@@ -1,0 +1,119 @@
+﻿<controls:MetroWindow x:Class="Cobalt.Views.ShellView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:views="clr-namespce:Cobalt.Views"
+        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+        xmlns:vm="clr-namespace:Cobalt.ViewModels"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:b="clr-namespace:Cobalt.Behaviors"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="500" Width="800" ResizeMode="CanResizeWithGrip"
+        TextOptions.TextFormattingMode="Display"         
+        GlowBrush="{DynamicResource AccentColorBrush}"
+        NonActiveGlowBrush="{DynamicResource NonActiveGlowBrush}"
+        NonActiveBorderBrush="Transparent"
+        Style="{DynamicResource CleanWindowStyleKey}"
+        >
+    <controls:MetroWindow.TitleTemplate>
+        <DataTemplate>
+        </DataTemplate>
+    </controls:MetroWindow.TitleTemplate>
+    <controls:MetroWindow.RightWindowCommands>
+        <controls:WindowCommands controls:ControlsHelper.ContentCharacterCasing="Normal">
+            <Button Content="Join a Channel" cal:Message.Attach="[Event Click] = [Action JoinChannel]">
+            </Button>
+            <Button Content="Servers" cal:Message.Attach="ToggleServersFlyout"/>
+            <Button Content="Settings"/>
+        </controls:WindowCommands>
+    </controls:MetroWindow.RightWindowCommands>
+    <controls:MetroWindow.Flyouts >
+        <controls:FlyoutsControl x:Name="FlyoutCollection">
+            <controls:FlyoutsControl.ItemContainerStyle>
+                <Style BasedOn="{StaticResource {x:Type controls:Flyout}}" TargetType="{x:Type controls:Flyout}">
+                    <Setter Property="Header" Value="{Binding Header}"/>
+                    <Setter Property="IsOpen" Value="{Binding IsOpen}"/>
+                    <Setter Property="Position" Value="{Binding Position}"/>
+                </Style>
+            </controls:FlyoutsControl.ItemContainerStyle>
+        </controls:FlyoutsControl>
+    </controls:MetroWindow.Flyouts>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        </Grid.Resources>
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource GrayBrush5}" FontSize="24" Text="Press CTRL + T to Open a New Tab"
+                   Visibility="{Binding NewTabInstructionsVisible, Converter={StaticResource BoolToVis}}"/>
+        <Grid Grid.Row="0">
+            <Grid.Resources>
+                <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" MinWidth="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+            </Grid.ColumnDefinitions>
+            <TreeView  Focusable="False" x:Name="Tabs" Grid.Column="0" FocusVisualStyle="{x:Null}"  d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
+                      dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
+                      dd:DragDrop.DragHandler="{Binding}" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.UseDefaultDragAdorner="True">
+                <i:Interaction.Behaviors>
+                    <b:BindableSelectedItemBehavior SelectedItem="{Binding ActiveItem, Mode=TwoWay}"/>
+                </i:Interaction.Behaviors>
+                <TreeView.Resources>
+                    <ContextMenu x:Key="ChannelListContextMenu" d:DataContext="{d:DesignInstance Type=vm:IrcTabViewModel}" DataContext="{Binding}" cal:Action.TargetWithoutContext="{Binding}">
+                        <MenuItem Header="{Binding DisplayName, FallbackValue=No, Mode=OneTime}"/>
+                        <Separator/>
+                        <MenuItem Header="Autojoin" IsCheckable="True" IsChecked="{Binding AutoJoin, Mode=TwoWay}" Visibility="{Binding IsChannel, Converter={StaticResource BoolToVis}}" />
+                        <MenuItem Header="Disconnect" Visibility="{Binding IsServer, Converter={StaticResource BoolToVis}}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <cal:ActionMessage MethodName="Disconnect"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </MenuItem>
+                        <MenuItem Header="Reconnect"  Visibility="{Binding IsServer, Converter={StaticResource BoolToVis}}" cal:Message.Attach="Reconnect">
+                        </MenuItem>
+                        <MenuItem Header="Close" cal:Message.Attach="Close()">
+                        </MenuItem>
+                    </ContextMenu>
+                </TreeView.Resources>
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}" d:DataContext="{d:DesignInstance Type=vm:IrcTabViewModel}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"  />
+                        <Setter Property="AllowDrop" Value="True"/>
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                        <Setter Property="FontWeight" Value="Normal" />
+                        <Setter Property="ContextMenu" Value="{StaticResource ChannelListContextMenu}"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="FontWeight" Value="Normal" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}" DataType="{x:Type vm:IrcTabViewModel}">
+                        <TextBlock Margin="5" Text="{Binding DisplayName}"/>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+            <GridSplitter IsTabStop="False" Grid.Column="1" Panel.ZIndex="1000" BorderThickness="3 0 3 0" Width="7" BorderBrush="Transparent" Background="Transparent" Margin="-3 0 -3 0" HorizontalAlignment="Stretch" />
+            <controls:TransitioningContentControl Grid.Column="2" Transition="Left" Margin="0 0 0 5" cal:View.Model="{Binding ActiveItem}"/>
+        </Grid>
+        <StatusBar Grid.Row="1" Background="{DynamicResource AccentColorBrush}" Height="22" VerticalAlignment="Bottom"/>
+    </Grid>
+</controls:MetroWindow>
