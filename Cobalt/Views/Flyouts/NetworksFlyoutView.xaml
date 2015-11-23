@@ -1,0 +1,151 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Cobalt.Views.Flyouts"
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:vms="clr-namespace:Cobalt.ViewModels.Flyouts"
+             xmlns:Custom="http://metro.mahapps.com/winfx/xaml/shared" x:Class="Cobalt.Views.Flyouts.NetworksFlyoutView"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:b="clr-namespace:Cobalt.Behaviors"
+             mc:Ignorable="d" 
+             Width="400"
+             d:DesignHeight="500" d:DesignWidth="400" d:DataContext="{d:DesignInstance {x:Type vms:NetworksFlyoutViewModel}}">
+    <UserControl.Resources>
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.Resources>
+            <ResourceDictionary Source="/Resources/Icons.xaml"/>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" BorderThickness="1" BorderBrush="{DynamicResource InverseControlBorderBrush}" Margin="4 0 0 4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Button x:Name="AddNetwork" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}">
+                        <Rectangle Width="10"
+							Height="10"
+							Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill"
+									Visual="{DynamicResource appbar_add}" />
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </Button>
+                    <Button x:Name="RemoveNetwork" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}">
+                        <Rectangle Width="10"
+							Height="10"
+							Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill"
+									Visual="{DynamicResource appbar_close}" />
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </Button>
+                </StackPanel>
+                <ListBox x:Name="listBox" ItemsSource="{Binding Networks}" SelectedItem="{Binding SelectedNetwork}" Grid.Row="1" DisplayMemberPath="Name"/>
+            </Grid>
+        </Border>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer Margin="10 0 0 0">
+                <StackPanel Margin="0 0 10 0" IsEnabled="{Binding SelectedValue, ElementName=listBox, Converter={StaticResource ObjectToBooleanConverter}}">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource MetroCheckBox}">
+                            <Setter Property="Margin" Value="0 10 0 0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBox controls:TextBoxHelper.Watermark="Network Name" Text="{Binding SelectedNetwork.Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}">
+                    </TextBox>
+                    <Grid Margin="0 10 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="5*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" controls:TextBoxHelper.Watermark="Hostname" Text="{Binding SelectedNetwork.Hostname}"/>
+                        <TextBox Text="{Binding SelectedNetwork.Port, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Grid.Column="1" Margin="5 0 0 0" controls:TextBoxHelper.Watermark="Port" controls:TextBoxHelper.SelectAllOnFocus="True"/>
+                    </Grid>
+                    <PasswordBox Margin="0 10 0 0" controls:TextBoxHelper.ClearTextButton="True" controls:TextBoxHelper.Watermark="Server Password" >
+                        <i:Interaction.Behaviors>
+                            <b:BindablePasswordBehavior Password="{Binding SelectedNetwork.Password, Mode=TwoWay}"/>
+                        </i:Interaction.Behaviors>
+                    </PasswordBox>
+                    <CheckBox Content="SSL Enabled" IsChecked="{Binding SelectedNetwork.IsSecure}"/>
+                    <CheckBox Content="Connect on Startup" IsChecked="{Binding SelectedNetwork.ConnectOnStartup}"/>
+                    <CheckBox Content="Auto Reconnect" IsChecked="{Binding SelectedNetwork.AutoReconnect}"/>
+                    <controls:MetroAnimatedTabControl>
+                        <TabItem Header="Channels" controls:ControlsHelper.HeaderFontSize="14" controls:ControlsHelper.HeaderFontWeight="Medium" Height="22.62" VerticalAlignment="Top">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <DataGrid SelectedItem="{Binding SelectedChannel}" ItemsSource="{Binding SelectedNetwork.Channels}" CanUserAddRows="False" BorderBrush="{DynamicResource InverseControlBorderBrush}" BorderThickness="1" CanUserReorderColumns="False" Grid.Column="0" Height="200" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="1*" Header="Name" Binding="{Binding Name, ValidatesOnExceptions=True}"/>
+                                        <DataGridTextColumn Width="1*" Header="Key" Binding="{Binding Password, ValidatesOnExceptions=True}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
+                                    <Button x:Name="AddChannel" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}" Command="{Binding AddChannelCommand}">
+                                        <Rectangle Width="10"
+                                              Height="10"
+                                                 Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                                            <Rectangle.OpacityMask>
+                                                <VisualBrush Stretch="Fill"
+                                     Visual="{DynamicResource appbar_add}" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                    </Button>
+                                    <Button x:Name="RemoveChannel" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}" Command="{Binding RemoveChannelCommand}">
+                                        <Rectangle Width="10"
+                                             Height="10"
+                                             Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                                            <Rectangle.OpacityMask>
+                                                <VisualBrush Stretch="Fill"
+                                               Visual="{DynamicResource appbar_close}" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="User" controls:ControlsHelper.HeaderFontSize="14" controls:ControlsHelper.HeaderFontWeight="Medium">
+                            <Border BorderBrush="{DynamicResource InverseControlBorderBrush}" BorderThickness="1">
+                                <StackPanel Margin="4">
+                                    <CheckBox x:Name="checkBox" Content="Override Default User Info" IsChecked="{Binding SelectedNetwork.OverrideGlobalProfile}" />
+                                    <StackPanel IsEnabled="{Binding IsChecked, ElementName=checkBox, FallbackValue=Collapsed, Mode=TwoWay}">
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.Nickname1}" controls:TextBoxHelper.Watermark="Nickname"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.Nickname2}" controls:TextBoxHelper.Watermark="Second Alternative"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.Username}" controls:TextBoxHelper.Watermark="Username"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.FullName}" controls:TextBoxHelper.Watermark="Full Name"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.NickservPassword}" controls:TextBoxHelper.Watermark="Nickserv Password"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </TabItem>
+                        <TabItem Header="Commands" controls:ControlsHelper.HeaderFontSize="14" controls:ControlsHelper.HeaderFontWeight="Medium">
+                            <TabItem.Resources>
+                                <ToolTip x:Key="ttOnConnect">Specifies a sequence of commands (one per line) to execute on successful connection. Can be used to authenticate or join channels.</ToolTip>
+                            </TabItem.Resources>
+                            <TextBox ToolTip="{StaticResource ttOnConnect}" AcceptsReturn="True" Height="200" controls:TextBoxHelper.Watermark="Use '/delay n' to time commands" Text="{Binding SelectedNetwork.ConnectCommands}"></TextBox>
+                        </TabItem>
+                    </controls:MetroAnimatedTabControl>
+                </StackPanel>
+            </ScrollViewer>
+            <Button Grid.Row="1" Margin="4" Style="{DynamicResource AccentedSquareButtonStyle}"  BorderThickness="1" controls:ButtonHelper.PreserveTextCase="True" Content="Connect">
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

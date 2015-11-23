@@ -19,7 +19,7 @@ namespace Cobalt.ViewModels.Flyouts
             }
         }
 
-        private bool _isOpen = false;
+        private bool _isOpen;
 
         public virtual bool IsOpen
         {

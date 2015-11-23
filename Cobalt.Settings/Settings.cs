@@ -49,34 +49,37 @@ namespace Cobalt.Settings
             });
         }
 
-        public void InitializeDefaults()
+        public void InitializeDefaults(bool overwrite = false)
         {
             if (Directory.Exists(BasePath))
             {
-                if (File.Exists(SettingsFilePath))
+                if (overwrite == false && File.Exists(SettingsFilePath))
                 {
                     return;
                 }
             }
             this.RootElement = new SettingsElement()
             {
-                Servers = new List<ServerElement>()
+                Networks = 
                 {
-                    new ServerElement()
+                    new NetworkElement()
                     {
                         Name = "Cobalt",
                         Hostname = "irc.cobaltapp.net",
                         Port = 6667,
-                        Channels = new List<string>() {"#flux"}
+                        Channels = {new ChannelElement()
+                        {
+                            Name = "#flux"                            
+                        }}
                     }
                 },
                 DefaultProfile = new UserProfileElement()
                 {
                     Nickname1 = $"{Environment.UserName}",
                     Nickname2 = $"{Environment.UserName}_",
-                    Nickname3 = $"{Environment.UserName}__",
                     Username = Environment.UserName,
-                    FullName = Environment.UserName
+                    FullName = Environment.UserName,
+                    NickservPassword = "daki123"
                 },
                 FontFamily = "Segoe UI",
                 FontSize = 14,
@@ -87,8 +90,16 @@ namespace Cobalt.Settings
 
         public void Load()
         {
-            string data = File.ReadAllText(SettingsFilePath);
-            RootElement = _serializer.Deserialize(data);
+            try
+            {
+                string data = File.ReadAllText(SettingsFilePath);
+                RootElement = _serializer.Deserialize(data);
+            }
+            catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
+            {
+                InitializeDefaults();
+                Save();
+            }
         }
     }
 }

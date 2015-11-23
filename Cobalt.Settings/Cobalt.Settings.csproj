@@ -48,8 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Elements\ChannelElement.cs" />
     <Compile Include="Serializers\ISettingsSerializer.cs" />
-    <Compile Include="Elements\ServerElement.cs" />
+    <Compile Include="Elements\NetworkElement.cs" />
     <Compile Include="Serializers\JsonSettingsSerializer.cs" />
     <Compile Include="Serializers\SettingsSerializerFactory.cs" />
     <Compile Include="Serializers\XmlSettingsSerializer.cs" />

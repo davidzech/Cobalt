@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Caliburn.Micro;
 using Cobalt.ViewModels.Flyouts;
 using GongSolutions.Wpf.DragDrop;
+using MahApps.Metro.Controls.Dialogs;
 using DragDrop = GongSolutions.Wpf.DragDrop.DragDrop;
 
 namespace Cobalt.ViewModels
@@ -14,7 +15,7 @@ namespace Cobalt.ViewModels
     public class ShellViewModel : Conductor<IrcTabViewModel>, IDragSource, IDropTarget, IShell
     {
         private readonly BindableCollection<IFlyout> _flyoutCollection = new BindableCollection<IFlyout>();
-        readonly IFlyout _serversFlyout = new ServersFlyoutViewModel();
+        private readonly IFlyout _networksFlyout;
         private readonly BindableCollection<IrcTabViewModel> _tabs = new BindableCollection<IrcTabViewModel>();
 
         private readonly IWindowManager _windowManager;
@@ -25,6 +26,7 @@ namespace Cobalt.ViewModels
             _windowManager = windowManager;
             Activated += MainViewModel_Activated;
             _tabs.CollectionChanged += _tabs_CollectionChanged;
+            _networksFlyout = new NetworksFlyoutViewModel(IoC.Get<IDialogCoordinator>()) { Parent = this };
         }
 
         private void _tabs_CollectionChanged(object sender,
@@ -48,7 +50,7 @@ namespace Cobalt.ViewModels
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _flyoutCollection.Add(_serversFlyout);
+            _flyoutCollection.Add(_networksFlyout);
         }
 
 
@@ -67,9 +69,9 @@ namespace Cobalt.ViewModels
             ActivateItem(new IrcTabViewModel() {DisplayName = "Button"});
         }
     
-        public void ToggleServersFlyout()
+        public void ToggleNetworksFlyout()
         {
-            _serversFlyout.IsOpen = !_serversFlyout.IsOpen;
+            _networksFlyout.IsOpen = !_networksFlyout.IsOpen;
         }
 
         #endregion
@@ -145,7 +147,7 @@ namespace Cobalt.ViewModels
             {
                 foreach (var chan in item.Children)
                 {
-                    base.EnsureItem(chan);
+                    EnsureItem(chan);
                 }
                 if (!Tabs.Contains(item))
                     Tabs.Add(item);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Caliburn.Micro;
 using CobaltSettings.Annotations;
 
 namespace Cobalt.Settings.Elements
@@ -70,20 +71,9 @@ namespace Cobalt.Settings.Elements
             }
         }
 
-        private List<ServerElement> _servers = new List<ServerElement>();
+        private readonly IObservableCollection<NetworkElement> _networks = new BindableCollection<NetworkElement>();
 
-        public List<ServerElement> Servers
-        {
-            get { return _servers; }
-            set
-            {
-                if (_servers != value)
-                {
-                    _servers = value;
-                    OnPropertyChanged();
-                }
-            }
-        }        
+        public IObservableCollection<NetworkElement> Networks => _networks;
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

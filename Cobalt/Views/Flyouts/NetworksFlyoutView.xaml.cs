@@ -12,17 +12,23 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Cobalt.Settings.Elements;
 
 namespace Cobalt.Views.Flyouts
 {
     /// <summary>
     /// Interaction logic for ServersFlyoutView.xaml
     /// </summary>
-    public partial class ServersFlyoutView : UserControl
+    public partial class NetworksFlyoutView : UserControl
     {
-        public ServersFlyoutView()
+        public NetworksFlyoutView()
         {
             InitializeComponent();
+        }
+
+        private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+
         }
     }
 }

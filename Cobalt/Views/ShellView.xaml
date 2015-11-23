@@ -5,19 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         xmlns:views="clr-namespce:Cobalt.Views"
         xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
         xmlns:vm="clr-namespace:Cobalt.ViewModels"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:b="clr-namespace:Cobalt.Behaviors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800" ResizeMode="CanResizeWithGrip"
+        Title="MainWindow" Height="600" Width="1000" ResizeMode="CanResizeWithGrip"
         TextOptions.TextFormattingMode="Display"         
         GlowBrush="{DynamicResource AccentColorBrush}"
         NonActiveGlowBrush="{DynamicResource NonActiveGlowBrush}"
         NonActiveBorderBrush="Transparent"
         Style="{DynamicResource CleanWindowStyleKey}"
-        >
+        dialog:DialogParticipation.Register="{Binding}">
     <controls:MetroWindow.TitleTemplate>
         <DataTemplate>
         </DataTemplate>
@@ -26,17 +27,18 @@
         <controls:WindowCommands controls:ControlsHelper.ContentCharacterCasing="Normal">
             <Button Content="Join a Channel" cal:Message.Attach="[Event Click] = [Action JoinChannel]">
             </Button>
-            <Button Content="Servers" cal:Message.Attach="ToggleServersFlyout"/>
+            <Button Content="Networks" cal:Message.Attach="ToggleNetworksFlyout"/>
             <Button Content="Settings"/>
         </controls:WindowCommands>
     </controls:MetroWindow.RightWindowCommands>
     <controls:MetroWindow.Flyouts >
-        <controls:FlyoutsControl x:Name="FlyoutCollection">
+        <controls:FlyoutsControl x:Name="FlyoutCollection" >
             <controls:FlyoutsControl.ItemContainerStyle>
                 <Style BasedOn="{StaticResource {x:Type controls:Flyout}}" TargetType="{x:Type controls:Flyout}">
                     <Setter Property="Header" Value="{Binding Header}"/>
                     <Setter Property="IsOpen" Value="{Binding IsOpen}"/>
                     <Setter Property="Position" Value="{Binding Position}"/>
+                    <Setter Property="Theme" Value="Inverse"/>
                 </Style>
             </controls:FlyoutsControl.ItemContainerStyle>
         </controls:FlyoutsControl>
@@ -112,7 +114,7 @@
                 </TreeView.ItemTemplate>
             </TreeView>
             <GridSplitter IsTabStop="False" Grid.Column="1" Panel.ZIndex="1000" BorderThickness="3 0 3 0" Width="7" BorderBrush="Transparent" Background="Transparent" Margin="-3 0 -3 0" HorizontalAlignment="Stretch" />
-            <controls:TransitioningContentControl Grid.Column="2" Transition="Left" Margin="0 0 0 5" cal:View.Model="{Binding ActiveItem}"/>
+            <controls:TransitioningContentControl Transition="Left" Grid.Column="2" Margin="0 0 0 5" cal:View.Model="{Binding ActiveItem}"/>
         </Grid>
         <StatusBar Grid.Row="1" Background="{DynamicResource AccentColorBrush}" Height="22" VerticalAlignment="Bottom"/>
     </Grid>

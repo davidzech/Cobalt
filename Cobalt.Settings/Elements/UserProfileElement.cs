@@ -38,20 +38,6 @@ namespace Cobalt.Settings.Elements
             }
         }
 
-        private string _nickname3;
-
-        public string Nickname3
-        {
-            get { return _nickname3; }
-            set
-            {
-                if (_nickname3 != value)
-                {
-                    _nickname3 = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
         private string _username;
 

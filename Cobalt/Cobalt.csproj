@@ -100,9 +100,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Behaviors\BindablePasswordBehavior.cs" />
     <Compile Include="Behaviors\BindableSelectedItemBehavior.cs" />
     <Compile Include="CobaltBootstrapper.cs" />
+    <Compile Include="Converters\NullToBooleanConverter.cs" />
     <Compile Include="Extensibility\CobaltWindowManager.cs" />
+    <Compile Include="Extensibility\DialogManager.cs" />
     <Compile Include="Extensibility\IThemeManager.cs" />
     <Compile Include="Extensibility\IViewLocator.cs" />
     <Compile Include="Extensibility\MetroBootstrapper.cs" />
@@ -110,27 +113,23 @@
     <Compile Include="Extensibility\StartupTasks.cs" />
     <Compile Include="Extensibility\ThemeManager.cs" />
     <Compile Include="Extensibility\ViewLocator.cs" />
+    <Compile Include="ViewModels\Flyouts\NetworksFlyoutViewModel.cs" />
     <Compile Include="ViewModels\IShell.cs" />
     <Compile Include="Services\IServiceLocator.cs" />
     <Compile Include="Services\MefServiceLocator.cs" />
     <Compile Include="ViewModels\Flyouts\FlyoutViewModelBase.cs" />
     <Compile Include="ViewModels\Flyouts\IFlyout.cs" />
-    <Compile Include="ViewModels\Flyouts\ServersFlyoutViewModel.cs" />
     <Compile Include="ViewModels\IrcTabViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Page Include="Themes\CobaltMetro.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Flyouts\ServersFlyoutView.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Views\Flyouts\NetworksFlyoutView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\IrcTabView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -142,14 +141,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\Flyouts\ServersFlyoutView.xaml.cs">
-      <DependentUpon>ServersFlyoutView.xaml</DependentUpon>
+    <Compile Include="Views\Flyouts\NetworksFlyoutView.xaml.cs">
+      <DependentUpon>NetworksFlyoutView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\IrcTabView.xaml.cs">
       <DependentUpon>IrcTabView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MainView.xaml.cs">
-      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
@@ -186,7 +182,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -220,7 +218,12 @@
       <Project>{B559CBD0-1CF2-4467-92AE-7492922A0E23}</Project>
       <Name>Cobalt.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Cobalt.Settings\Cobalt.Settings.csproj">
+      <Project>{3379F3CF-F01A-4526-8BE9-E419418F3BE6}</Project>
+      <Name>Cobalt.Settings</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
