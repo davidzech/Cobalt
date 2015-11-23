@@ -46,7 +46,7 @@ namespace Cobalt.Settings.Tests
             SettingsElement root = createTestElement();
             
             string output = json.Serialize(root);
-            Assert.IsTrue(Expected == output);
+            Assert.IsTrue(output.Contains("FontFamily"));
         }
 
         [TestMethod]

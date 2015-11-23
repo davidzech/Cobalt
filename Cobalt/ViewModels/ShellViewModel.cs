@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
+using Cobalt.Settings;
 using Cobalt.ViewModels.Flyouts;
 using GongSolutions.Wpf.DragDrop;
 using MahApps.Metro.Controls.Dialogs;
@@ -21,12 +22,12 @@ namespace Cobalt.ViewModels
         private readonly IWindowManager _windowManager;
         
         [ImportingConstructor]
-        public ShellViewModel(IWindowManager windowManager)
+        public ShellViewModel(IWindowManager windowManager, IDialogCoordinator coordinator, ISettings settings)
         {
             _windowManager = windowManager;
             Activated += MainViewModel_Activated;
             _tabs.CollectionChanged += _tabs_CollectionChanged;
-            _networksFlyout = new NetworksFlyoutViewModel(IoC.Get<IDialogCoordinator>()) { Parent = this };
+            _networksFlyout = new NetworksFlyoutViewModel(coordinator, settings) { Parent = this };
         }
 
         private void _tabs_CollectionChanged(object sender,
@@ -38,6 +39,7 @@ namespace Cobalt.ViewModels
         private async void MainViewModel_Activated(object sender, ActivationEventArgs e)
         {
             await Task.Yield();
+            /*
             var tab = new IrcTabViewModel() {DisplayName = "Root"};
             tab.AddChild(new IrcTabViewModel() {DisplayName = "Child"});
             tab.AddChild(new IrcTabViewModel() {DisplayName = "Child2"});
@@ -45,6 +47,7 @@ namespace Cobalt.ViewModels
             tab = new IrcTabViewModel() {DisplayName = "Root2"};
             tab.AddChild(new IrcTabViewModel() {DisplayName = "2Child"});
             ActivateItem(tab);
+            */
         }
 
         protected override void OnInitialize()
@@ -66,7 +69,6 @@ namespace Cobalt.ViewModels
 
         public void JoinChannel()
         {
-            ActivateItem(new IrcTabViewModel() {DisplayName = "Button"});
         }
     
         public void ToggleNetworksFlyout()

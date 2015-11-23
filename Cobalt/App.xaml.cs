@@ -14,25 +14,6 @@ namespace Cobalt
         public App()
         {
             ShutdownMode = ShutdownMode.OnMainWindowClose;
-
-            try
-            {
-                Settings =
-                    new Cobalt.Settings.Settings(Cobalt.Settings.Serializers.SettingsSerializerFactory.Get("JSON"),
-                        "settings");
-                Settings.Load();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("An issue occured when loading application settings. Please try removing the settings file.");                
-            }
-
         }
-
-        public static Settings.Settings Settings
-        {
-            get;
-            private set;
-        } 
     }
 }

@@ -3,6 +3,7 @@ using Cobalt.Core.Irc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Remoting.Channels;
 using System.Threading;
@@ -154,6 +155,33 @@ namespace Cobalt.Core.Tests
             {
 
             }
+        }
+
+        [TestMethod]
+        public async Task TestBadSslConnection()
+        {
+                try
+                {
+                    Task t = Task.Delay(5000, stoken.Token);
+                    IrcConnection c = new IrcConnection();
+                    bool caughtError = false;
+                    c.ConnectionError += (sender, error) =>
+                    {
+                        Debug.WriteLine(error.ToString());
+                        Assert.IsTrue(error.Exception is IOException);
+                        var se = error.Exception as IOException;                        
+                        caughtError = true;
+                        stoken.Cancel();
+                    };
+                    await c.ConnectAsync("irc.cobaltapp.net", 6667, true, "Test", "Test", "Test", false);
+                    Assert.IsFalse(c.State == IrcConnectionState.Disconnected);
+                    await t;
+                    Assert.IsTrue(caughtError);
+                }
+                catch (TaskCanceledException e)
+                {
+
+                }            
         }
     }
 }

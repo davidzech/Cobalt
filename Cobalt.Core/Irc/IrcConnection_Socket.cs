@@ -63,6 +63,10 @@ namespace Cobalt.Core.Irc
             {
                 OnConnectionError(new ErrorEventArgs(e));
             }
+            catch (IOException e)
+            {
+                OnConnectionError(new ErrorEventArgs(e));
+            }
         }
 
         private void Close()

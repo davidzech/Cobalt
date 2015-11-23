@@ -144,7 +144,7 @@
                     </controls:MetroAnimatedTabControl>
                 </StackPanel>
             </ScrollViewer>
-            <Button Grid.Row="1" Margin="4" Style="{DynamicResource AccentedSquareButtonStyle}"  BorderThickness="1" controls:ButtonHelper.PreserveTextCase="True" Content="Connect">
+            <Button x:Name="Connect" Grid.Row="1" Margin="4" Style="{DynamicResource AccentedSquareButtonStyle}"  BorderThickness="1" controls:ButtonHelper.PreserveTextCase="True" Content="Connect">
             </Button>
         </Grid>
     </Grid>

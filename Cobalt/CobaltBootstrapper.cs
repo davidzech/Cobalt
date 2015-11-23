@@ -11,6 +11,7 @@ using Cobalt.ViewModels;
 using Caliburn.Micro;
 using Cobalt.Core.Network;
 using Cobalt.Extensibility;
+using Cobalt.Settings;
 using MahApps.Metro.Controls.Dialogs;
 using ThemeManager = MahApps.Metro.ThemeManager;
 
@@ -25,7 +26,7 @@ namespace Cobalt
 
         protected override void OnExit(object sender, EventArgs e)
         {
-            App.Settings.Save();
+            IoC.Get<ISettings>().Save();
             base.OnExit(sender, e);
         }
 
@@ -53,7 +54,7 @@ namespace Cobalt
                 "An Unrecoverable Error has Occured", MessageBoxButton.OK, MessageBoxImage.Error);
             try
             {
-                App.Settings.Save();                
+                IoC.Get<ISettings>().Save();
             }
             catch (Exception)
             {
@@ -67,6 +68,10 @@ namespace Cobalt
             builder.AddExportedValue<IWindowManager>(new CobaltWindowManager());
             builder.AddExportedValue<IDialogCoordinator>(new MetroDialogManager());
             builder.AddExportedValue<IEventAggregator>(new EventAggregator());
+            var settings = new Settings.Settings(Cobalt.Settings.Serializers.SettingsSerializerFactory.Get("JSON"),
+                        "settings");
+            settings.Load();
+            builder.AddExportedValue<ISettings>(settings);
         }
 
     }

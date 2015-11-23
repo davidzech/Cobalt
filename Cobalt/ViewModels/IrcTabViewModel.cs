@@ -5,14 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
+using Cobalt.Core.Irc;
 
 namespace Cobalt.ViewModels
 {
     public class IrcTabViewModel : Screen
     {
-
+        private IrcConnection _connection;
+        public IrcConnection Connection => _connection;        
         public IObservableCollection<IrcTabViewModel> Children { get; } = new BindableCollection<IrcTabViewModel>();
 
+        public IrcTabViewModel(IrcConnection connection)
+        {
+            _connection = connection;
+        }
 
         public void AddChild(IrcTabViewModel child)
         {

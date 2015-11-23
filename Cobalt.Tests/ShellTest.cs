@@ -1,9 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Caliburn.Micro;
-using Cobalt.Extensibility;
+using Cobalt.Core.Irc;
+using Cobalt.Settings;
+using Cobalt.Settings.Elements;
 using Cobalt.ViewModels;
+using MahApps.Metro.Controls.Dialogs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Cobalt.Tests
 {
@@ -28,12 +31,22 @@ namespace Cobalt.Tests
     [TestClass]
     public class ShellTest
     {
+        [TestInitialize]
+        public void Setup()
+        {
+        }
+
         [TestMethod]
         public void TestShell()
         {
-            ShellViewModel svm = new ShellViewModel(new StubbedWindowManager());
-            svm.ActivateItem(new IrcTabViewModel() {DisplayName = "Test"});
+            var mockCoordinator = new Mock<IDialogCoordinator>();
+            ISettings settings = new Settings.Settings(Settings.Serializers.SettingsSerializerFactory.Get("JSON"), "settings.TEST");
+            settings.InitializeDefaults();
+            ShellViewModel svm = new ShellViewModel(new StubbedWindowManager(), mockCoordinator.Object, settings);
+            var mock = new Mock<IrcConnection>();
+
+            svm.ActivateItem(new IrcTabViewModel(mock.Object) {DisplayName = "Test"});
             Assert.IsTrue(svm.Tabs.Count == 1);
-        }
     }
+        }
 }

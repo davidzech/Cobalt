@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading.Tasks;
 using Caliburn.Micro;
+using Cobalt.Core.Irc;
+using Cobalt.Settings;
 using Cobalt.Settings.Elements;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -18,14 +21,23 @@ namespace Cobalt.ViewModels.Flyouts
         }
 
         private readonly IDialogCoordinator _coordinator;
+        private readonly ISettings _settings;
+
         [ImportingConstructor]
-        public NetworksFlyoutViewModel(IDialogCoordinator coordinator)
+        public NetworksFlyoutViewModel(IDialogCoordinator coordinator, ISettings settings)
         {
             _coordinator = coordinator;
+            _settings = settings;
             SelectedNetwork = Networks.FirstOrDefault();
+            PropertyChanged += NetworksFlyoutViewModel_PropertyChanged;
         }
 
-        public IObservableCollection<NetworkElement> Networks => App.Settings.RootElement.Networks;
+        ~NetworksFlyoutViewModel()
+        {
+            PropertyChanged -= NetworksFlyoutViewModel_PropertyChanged;
+        }
+
+        public IObservableCollection<NetworkElement> Networks => _settings.RootElement.Networks;
 
         private NetworkElement _selectedNetwork;
         public NetworkElement SelectedNetwork
@@ -89,6 +101,37 @@ namespace Cobalt.ViewModels.Flyouts
         public bool CanRemoveNetwork()
         {
             return SelectedNetwork != null;
+        }
+
+        public bool CanConnect()
+        {
+            return SelectedNetwork != null;
+        }
+
+        public async void Connect()
+        {
+            var svm = Parent as ShellViewModel;
+            var connection = new IrcConnection();
+            var tab = new IrcTabViewModel(connection) {DisplayName = SelectedNetwork.Name};
+            svm?.ActivateItem(tab);
+            IsOpen = false;
+            await Task.Yield();
+            var nickName = SelectedNetwork?.UserProfile?.Nickname1 ?? _settings.RootElement.DefaultProfile.Nickname1;
+            var fullName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
+            var userName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
+
+            await
+                connection.ConnectAsync(SelectedNetwork.Hostname, SelectedNetwork.Port, SelectedNetwork.IsSecure,
+                    nickName, userName, fullName,
+                    SelectedNetwork.AutoReconnect, SelectedNetwork.Password, false, true);
+        }
+
+        private async void NetworksFlyoutViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsOpen))
+            {
+                await _settings.SaveAsync();
+            }
         }
 
         public async void RemoveNetwork()
