@@ -103,6 +103,15 @@
     <Compile Include="Behaviors\BindablePasswordBehavior.cs" />
     <Compile Include="Behaviors\BindableSelectedItemBehavior.cs" />
     <Compile Include="CobaltBootstrapper.cs" />
+    <Compile Include="Controls\Block.cs" />
+    <Compile Include="Controls\ChatBox.xaml.cs">
+      <DependentUpon>ChatBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MessageFormatter.cs" />
+    <Compile Include="Controls\MessageLine.cs" />
+    <Compile Include="Controls\ChatPresenter.cs" />
+    <Compile Include="Controls\ChatPresenter_Properties.cs" />
+    <Compile Include="Controls\ChatPresenter_Scrolling.cs" />
     <Compile Include="Converters\NullToBooleanConverter.cs" />
     <Compile Include="Extensibility\CobaltWindowManager.cs" />
     <Compile Include="Extensibility\DialogManager.cs" />
@@ -122,9 +131,17 @@
     <Compile Include="ViewModels\Flyouts\IFlyout.cs" />
     <Compile Include="ViewModels\IrcTabViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Page Include="Controls\ChatBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\CobaltMetro.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Flyouts\NetworksFlyoutView.xaml">
       <Generator>MSBuild:Compile</Generator>
