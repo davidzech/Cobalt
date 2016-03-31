@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Media;
@@ -7,15 +8,15 @@ namespace Cobalt.Controls
 {
     internal partial class ChatPresenter
     {
-        public IEnumerable MessagesSource
+        public IEnumerable<MessageLine> MessagesSource
         {
-            get { return (IEnumerable)GetValue(MessagesSourceProperty); }
+            get { return (IEnumerable<MessageLine>) GetValue(MessagesSourceProperty); }
             set { SetValue(MessagesSourceProperty, value); }
         }
 
         public static readonly DependencyProperty MessagesSourceProperty = DependencyProperty.Register(
-            "MessagesSource", typeof(IEnumerable), typeof(ChatPresenter),
-            new PropertyMetadata(new PropertyChangedCallback(OnMessagesSourcePropertyChanged)));
+            "MessagesSource", typeof(IEnumerable<MessageLine>), typeof(ChatPresenter),
+            new PropertyMetadata(new List<MessageLine>(), new PropertyChangedCallback(OnMessagesSourcePropertyChanged)));
 
         private static void OnMessagesSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {

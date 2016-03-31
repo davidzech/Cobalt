@@ -25,14 +25,15 @@ namespace Cobalt.Controls
         public ChatBox()
         {
             InitializeComponent();
+            MessagesSource = new List<MessageLine>();
         }
 
         public static readonly DependencyProperty MessagesSourceProperty = DependencyProperty.Register(
-            "MessagesSource", typeof (IEnumerable), typeof (ChatBox));
+            "MessagesSource", typeof (IEnumerable<MessageLine>), typeof (ChatBox), new PropertyMetadata(new List<MessageLine>()));
 
-        public IEnumerable MessagesSource
+        public IEnumerable<MessageLine> MessagesSource
         {
-            get { return (IEnumerable)GetValue(MessagesSourceProperty); }
+            get { return (IEnumerable<MessageLine>)GetValue(MessagesSourceProperty); }
             set { SetValue(MessagesSourceProperty, value); }
         }      
     }

@@ -34,6 +34,11 @@ namespace Cobalt.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof (ChatPresenter),
                 new FrameworkPropertyMetadata(typeof (ChatPresenter)));
         }
+
+        public ChatPresenter()
+        {
+            MessagesSource = new List<MessageLine>();
+        }
                 
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -51,7 +56,7 @@ namespace Cobalt.Controls
             int curLine = 0;
             var guidelines = new GuidelineSet();
 
-            foreach (var message in MessagesSource.OfType<MessageLine>())
+            foreach (var message in MessagesSource)
             {
                 // TODO cache rendering? probably not
                 using (Block b = new Block {Source = message})

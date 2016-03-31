@@ -110,8 +110,8 @@
     <Compile Include="Controls\MessageFormatter.cs" />
     <Compile Include="Controls\MessageLine.cs" />
     <Compile Include="Controls\ChatPresenter.cs" />
-    <Compile Include="Controls\ChatPresenter_Properties.cs" />
-    <Compile Include="Controls\ChatPresenter_Scrolling.cs" />
+    <Compile Include="Controls\ChatPresenter.Properties.cs" />
+    <Compile Include="Controls\ChatPresenter.Scrolling.cs" />
     <Compile Include="Converters\NullToBooleanConverter.cs" />
     <Compile Include="Extensibility\CobaltWindowManager.cs" />
     <Compile Include="Extensibility\DialogManager.cs" />
@@ -124,6 +124,7 @@
     <Compile Include="Extensibility\ViewLocator.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="ViewModels\Flyouts\NetworksFlyoutViewModel.cs" />
+    <Compile Include="ViewModels\IrcTabViewModel.Events.cs" />
     <Compile Include="ViewModels\IShell.cs" />
     <Compile Include="Services\IServiceLocator.cs" />
     <Compile Include="Services\MefServiceLocator.cs" />
