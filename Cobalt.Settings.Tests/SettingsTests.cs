@@ -22,7 +22,7 @@ namespace CobaltSettingsTests
         public void TestDefaultInitialize()
         {
             Settings s = new Settings(SettingsSerializerFactory.Get("JSON"), "settings.test");
-            s.InitializeDefaults();
+            s.InitializeDefaults(true);
             Assert.IsTrue(s.RootElement.ScrollbackLines == 300);
             File.Delete(s.SettingsFilePath);
         }

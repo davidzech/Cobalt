@@ -45,7 +45,7 @@ namespace Cobalt.Tests
             ShellViewModel svm = new ShellViewModel(new StubbedWindowManager(), mockCoordinator.Object, settings);
             var mock = new Mock<IrcConnection>();
 
-            svm.ActivateItem(new IrcTabViewModel(mock.Object) {DisplayName = "Test"});
+            svm.ActivateItem(new IrcServerTabViewModel(settings, mock.Object) {DisplayName = "Test"});
             Assert.IsTrue(svm.Tabs.Count == 1);
     }
         }

@@ -94,7 +94,7 @@ namespace Cobalt.ViewModels.Flyouts
 
         public void AddNetwork()
         {
-            var network = new NetworkElement() { Name = "New Server"};        
+            var network = new NetworkElement() { UniqueIdentifier = Guid.NewGuid().ToString(), Name = "New Server"};        
             Networks.Add(network);
             SelectedNetwork = network;
         }
@@ -114,8 +114,8 @@ namespace Cobalt.ViewModels.Flyouts
             var svm = Parent as ShellViewModel;
             var connection = new IrcConnection();
             var chans = SelectedNetwork.Channels.Select(ce => new Tuple<string, string>(ce.Name, ce.Password));
-            string[] commands = SelectedNetwork.ConnectCommands.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-            var server = new IrcServerTabViewModel(connection, chans, commands) {DisplayName = SelectedNetwork.Name};
+            string[] commands = SelectedNetwork.ConnectCommands?.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var server = new IrcServerTabViewModel(_settings, connection, chans, commands) {DisplayName = SelectedNetwork.Name};
             svm?.ActivateItem(server);
             IsOpen = false;
             var nickName = SelectedNetwork?.UserProfile?.Nickname1 ?? _settings.RootElement.DefaultProfile.Nickname1;

@@ -66,12 +66,13 @@ namespace Cobalt.Settings
                 {
                     new NetworkElement()
                     {
+                        UniqueIdentifier = Guid.NewGuid().ToString(),
                         Name = "Cobalt",
                         Hostname = "irc.cobaltapp.net",
                         Port = 6667,
                         Channels = {new ChannelElement()
                         {
-                            Name = "#flux"                            
+                            Name = "#flux"
                         }}
                     }
                 },

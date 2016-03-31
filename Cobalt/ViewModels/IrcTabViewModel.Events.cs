@@ -16,11 +16,20 @@ namespace Cobalt.ViewModels
             Connection.ConnectionError += Connection_ConnectionError;
             Connection.Noticed += Connection_Noticed;
             Connection.PrivateMessaged += Connection_PrivateMessaged;
+            Connection.SelfJoined += Connection_SelfJoined;
+        }
+
+        protected virtual void Connection_SelfJoined(object sender, IrcJoinEventArgs e)
+        {
         }
 
         private void UnsubscribeIrcEvents()
         {
-            
+            Connection.StateChanged -= Connection_StateChanged;
+            Connection.ConnectionError -= Connection_ConnectionError;
+            Connection.Noticed -= Connection_Noticed;
+            Connection.PrivateMessaged -= Connection_PrivateMessaged;
+            Connection.SelfJoined -= Connection_SelfJoined;
         }
 
         protected virtual void Connection_PrivateMessaged(object sender, Core.Irc.IrcMessageEventArgs e)
@@ -41,17 +50,15 @@ namespace Cobalt.ViewModels
 
         protected virtual void Connection_Noticed(object sender, Core.Irc.IrcMessageEventArgs e)
         {            
-            throw new NotImplementedException();
         }
 
         protected virtual void Connection_ConnectionError(object sender, Core.Irc.ErrorEventArgs e)
         {
-            throw new NotImplementedException();
         }
 
         protected virtual void Connection_StateChanged(object sender, EventArgs e)
         {
-            var state = this.Connection.State;
+            var state = Connection.State;
             if (state != IrcConnectionState.Connected)
             {
                 // TODO change notify state

@@ -17,7 +17,7 @@ namespace Cobalt.ViewModels
     {
         private readonly BindableCollection<IFlyout> _flyoutCollection = new BindableCollection<IFlyout>();
         private readonly IFlyout _networksFlyout;
-        private readonly BindableCollection<IrcTabViewModel> _tabs = new BindableCollection<IrcTabViewModel>();
+        private readonly BindableCollection<IrcServerTabViewModel> _tabs = new BindableCollection<IrcServerTabViewModel>();
 
         private readonly IWindowManager _windowManager;
         
@@ -58,7 +58,7 @@ namespace Cobalt.ViewModels
 
 
         public IObservableCollection<IFlyout> FlyoutCollection => _flyoutCollection;
-        public IObservableCollection<IrcTabViewModel> Tabs => _tabs;
+        public IObservableCollection<IrcServerTabViewModel> Tabs => _tabs;
 
         #region Actions
 
@@ -115,9 +115,11 @@ namespace Cobalt.ViewModels
             if (target != source && target.IsChannel == source.IsChannel &&
                 !dropInfo.InsertPosition.HasFlag(RelativeInsertPosition.TargetItemCenter))
             {
-                if (source.IsChannel)
+                if (source.IsChannel && target.IsChannel)
                 {
-                    if (target.IsChannel && source.ParentTab == target.ParentTab)
+                    IrcChannelTabViewModel ctarget = target as IrcChannelTabViewModel;
+                    IrcChannelTabViewModel csource = source as IrcChannelTabViewModel;
+                    if (ctarget.ParentTab == csource.ParentTab)
                     {
                         DragDrop.DefaultDropHandler.DragOver(dropInfo);
                     }
@@ -147,13 +149,14 @@ namespace Cobalt.ViewModels
             }
             else
             {
-                foreach (var chan in item.Children)
+                var server = (IrcServerTabViewModel) item;
+                foreach (var chan in server.Children)
                 {
                     EnsureItem(chan);
                 }
-                if (!Tabs.Contains(item))
-                    Tabs.Add(item);
-                base.ActivateItem(item);
+                if (!Tabs.Contains(server))
+                    Tabs.Add(server);
+                base.ActivateItem(server);
             }
         }
 
@@ -163,16 +166,18 @@ namespace Cobalt.ViewModels
             {
                 if (item.IsChannel)
                 {
-                    var parent = Tabs.First(s => s == item.ParentTab);
-                    parent.Children.Remove(item);
+                    var citem = (IrcChannelTabViewModel) item;
+                    var parent = Tabs.First(s => s == citem.ParentTab);
+                    parent.Children.Remove(citem);
                 }
                 else
                 {
-                    foreach (var child in item.Children)
+                    var server = (IrcServerTabViewModel) item;
+                    foreach (var child in server.Children)
                     {
                         base.DeactivateItem(child, true);
                     }
-                    Tabs.Remove(item);
+                    Tabs.Remove(server);
                 }
                 ActivateItem(DetermineNextItem(item));
             }
@@ -181,7 +186,7 @@ namespace Cobalt.ViewModels
 
         private static IrcTabViewModel DetermineNextItem(IrcTabViewModel removed)
         {
-            return removed?.ParentTab;
+            return (removed as IrcChannelTabViewModel)?.ParentTab;
         }
     }
 }

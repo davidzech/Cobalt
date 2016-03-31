@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace Cobalt.Views
 {
     /// <summary>
-    /// Interaction logic for IrcTabView.xaml
+    /// Interaction logic for IrcServerTabView.xaml
     /// </summary>
-    public partial class IrcTabView : UserControl
+    public partial class IrcServerTabView : UserControl
     {
-        public IrcTabView()
+        public IrcServerTabView()
         {
             InitializeComponent();
         }

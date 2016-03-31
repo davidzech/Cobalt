@@ -10,6 +10,18 @@ namespace Cobalt.Settings.Elements
     [Serializable]
     public sealed class NetworkElement : INotifyPropertyChanged
     {
+        private string _uniqueIdentifier;
+
+        public string UniqueIdentifier
+        {
+            get { return _uniqueIdentifier; }
+            set
+            {
+                _uniqueIdentifier = value;
+                OnPropertyChanged();
+            }
+        }
+
         private string _name = "";
         public string Name
         {

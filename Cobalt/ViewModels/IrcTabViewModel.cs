@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,38 +8,26 @@ using System.Windows;
 using Caliburn.Micro;
 using Cobalt.Controls;
 using Cobalt.Core.Irc;
+using Cobalt.Settings;
 
 namespace Cobalt.ViewModels
 {
-    public partial class IrcTabViewModel : Screen
+    public abstract partial class IrcTabViewModel : Screen
     {
-        public IrcConnection Connection { get; }
+        protected ISettings Settings { get; }
+        protected IrcConnection Connection { get; }
 
-        public IObservableCollection<IrcTabViewModel> Children { get; } = new BindableCollection<IrcTabViewModel>();
-        public IObservableCollection<MessageLine> Messages { get; } = new BindableCollection<MessageLine>(); 
+        public string UniqueIdentifier { get; }
+      
+        public IObservableCollection<MessageLine> Messages { get; } = new BindableCollection<MessageLine>();
 
-        public IrcTabViewModel(IrcConnection connection)
+        [ImportingConstructor]
+        protected IrcTabViewModel(ISettings settings, IrcConnection connection, string uniqueIdentifier = null)
         {
+            Settings = settings;
             Connection = connection;
+            UniqueIdentifier = uniqueIdentifier;
             SubscribeIrcEvents();
-        }
-
-        public void AddChild(IrcTabViewModel child)
-        {
-            child.ParentTab = this;
-            Children.Add(child);
-        }
-
-        private IrcTabViewModel _parentTab;
-
-        public IrcTabViewModel ParentTab
-        {
-            get { return _parentTab; }
-            set
-            {
-                _parentTab = value;
-                NotifyOfPropertyChange();
-            }
         }
 
         private bool _isExpanded = true;
@@ -49,17 +38,6 @@ namespace Cobalt.ViewModels
             set
             {
                 _isExpanded = value;
-                NotifyOfPropertyChange();
-            }
-        }
-
-        private bool _autoJoin;
-        public bool AutoJoin
-        {
-            get { return _autoJoin; }
-            set
-            {
-                _autoJoin = value;
                 NotifyOfPropertyChange();
             }
         }
@@ -77,7 +55,7 @@ namespace Cobalt.ViewModels
 
         private bool _isConnected = false;
 
-        private bool IsConnected
+        public bool IsConnected
         {
             get { return _isConnected; }
             set
@@ -99,9 +77,9 @@ namespace Cobalt.ViewModels
             }
         }
 
-        public bool IsChannel => ParentTab != null;
+        public abstract bool IsChannel { get; }
 
-        public bool IsServer => !IsChannel;
+        public abstract bool IsServer { get; }        
 
         public void Disconnect()
         {
