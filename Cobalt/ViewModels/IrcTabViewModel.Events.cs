@@ -23,7 +23,7 @@ namespace Cobalt.ViewModels
             
         }
 
-        private void Connection_PrivateMessaged(object sender, Core.Irc.IrcMessageEventArgs e)
+        protected virtual void Connection_PrivateMessaged(object sender, Core.Irc.IrcMessageEventArgs e)
         {
             // check if ignored 
 
@@ -39,19 +39,24 @@ namespace Cobalt.ViewModels
 
 
 
-        private void Connection_Noticed(object sender, Core.Irc.IrcMessageEventArgs e)
+        protected virtual void Connection_Noticed(object sender, Core.Irc.IrcMessageEventArgs e)
         {            
             throw new NotImplementedException();
         }
 
-        private void Connection_ConnectionError(object sender, Core.Irc.ErrorEventArgs e)
+        protected virtual void Connection_ConnectionError(object sender, Core.Irc.ErrorEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void Connection_StateChanged(object sender, EventArgs e)
+        protected virtual void Connection_StateChanged(object sender, EventArgs e)
         {
-            throw new NotImplementedException();           
+            var state = this.Connection.State;
+            if (state != IrcConnectionState.Connected)
+            {
+                // TODO change notify state
+                this.IsConnected = false;                
+            }
         }
 
         private void Write(MessageType type, string nick, string text, bool attention = false, int colorHashCode = 0)

@@ -15,11 +15,11 @@ namespace Cobalt.ViewModels
         public IrcConnection Connection { get; }
 
         public IObservableCollection<IrcTabViewModel> Children { get; } = new BindableCollection<IrcTabViewModel>();
-        public IObservableCollection<MessageLine> Messages { get; } = new BindableCollection<MessageLine>();
+        public IObservableCollection<MessageLine> Messages { get; } = new BindableCollection<MessageLine>(); 
 
         public IrcTabViewModel(IrcConnection connection)
         {
-            Connection = connection;            
+            Connection = connection;
             SubscribeIrcEvents();
         }
 
@@ -71,6 +71,18 @@ namespace Cobalt.ViewModels
             set
             {
                 _isSelected = value;
+                NotifyOfPropertyChange();
+            }
+        }
+
+        private bool _isConnected = false;
+
+        private bool IsConnected
+        {
+            get { return _isConnected; }
+            set
+            {
+                _isConnected = value;
                 NotifyOfPropertyChange();
             }
         }

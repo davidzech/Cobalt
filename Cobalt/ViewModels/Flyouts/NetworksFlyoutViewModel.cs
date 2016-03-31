@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
@@ -112,17 +113,17 @@ namespace Cobalt.ViewModels.Flyouts
         {
             var svm = Parent as ShellViewModel;
             var connection = new IrcConnection();
-            var tab = new IrcTabViewModel(connection) {DisplayName = SelectedNetwork.Name};
-            svm?.ActivateItem(tab);
+            var chans = SelectedNetwork.Channels.Select(ce => new Tuple<string, string>(ce.Name, ce.Password));
+            string[] commands = SelectedNetwork.ConnectCommands.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var server = new IrcServerTabViewModel(connection, chans, commands) {DisplayName = SelectedNetwork.Name};
+            svm?.ActivateItem(server);
             IsOpen = false;
             var nickName = SelectedNetwork?.UserProfile?.Nickname1 ?? _settings.RootElement.DefaultProfile.Nickname1;
             var fullName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
-            var userName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
+            var userName = SelectedNetwork?.UserProfile?.Username ?? _settings.RootElement.DefaultProfile.Username;
 
-            await
-                connection.ConnectAsync(SelectedNetwork.Hostname, SelectedNetwork.Port, SelectedNetwork.IsSecure,
-                    nickName, userName, fullName,
-                    SelectedNetwork.AutoReconnect, SelectedNetwork.Password);
+            await connection.ConnectAsync(SelectedNetwork.Hostname, SelectedNetwork.Port, SelectedNetwork.IsSecure,
+                    nickName, userName, fullName, SelectedNetwork.AutoReconnect, SelectedNetwork.Password);
         }
 
         private async void NetworksFlyoutViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

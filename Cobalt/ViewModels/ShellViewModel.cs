@@ -13,7 +13,7 @@ namespace Cobalt.ViewModels
 
     [Export(typeof(IShell))]
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class ShellViewModel : Conductor<IrcTabViewModel>, IDragSource, IDropTarget, IShell
+    public sealed class ShellViewModel : Conductor<IrcTabViewModel>, IDragSource, IDropTarget, IShell
     {
         private readonly BindableCollection<IFlyout> _flyoutCollection = new BindableCollection<IFlyout>();
         private readonly IFlyout _networksFlyout;
