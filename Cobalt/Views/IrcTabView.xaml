@@ -8,6 +8,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-            <ctrl:ChatBox MessagesSource=""/>
+            <ctrl:ChatBox MessagesSource="{Binding Messages}"/>
     </Grid>
 </UserControl>

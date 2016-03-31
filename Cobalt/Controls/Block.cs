@@ -1,9 +1,10 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
 
 namespace Cobalt.Controls
 {
-    public struct Block
+    public sealed class Block : IDisposable
     {
         public MessageLine Source;
         public Brush Foreground;
@@ -21,5 +22,29 @@ namespace Cobalt.Controls
         public double NickX;
         public double TextX;
         public double Height;
+
+        ~Block()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Time.Dispose();
+                Nick.Dispose();
+                foreach (var textLine in Text)
+                {
+                    textLine.Dispose();
+                }
+            }        
+        }
     }
 }

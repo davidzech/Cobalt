@@ -14,13 +14,13 @@ namespace Cobalt.Extensibility
             _themeResources = new ResourceDictionary
                                       {
                                           Source =
-                                              new Uri("pack://application:,,,/Themes/CobaltMetro.xaml")
+                                              new Uri("pack://application:,,,/Themes/CobaltLight.xaml")
                                       };
         }
 
         public ResourceDictionary GetThemeResources()
         {
-            return _themeResources;
+            return MahApps.Metro.ThemeManager.DetectAppStyle().Item1.Resources;
         }
     }
 }

@@ -33,8 +33,6 @@ namespace Cobalt.Extensibility
             }
 
             var newInstance = (UIElement)Activator.CreateInstance(viewType);
-            var frameworkElement = newInstance as FrameworkElement;
-            frameworkElement?.Resources.MergedDictionaries.Add(_themeManager.GetThemeResources());
 
             Caliburn.Micro.ViewLocator.InitializeComponent(newInstance);
             return newInstance;

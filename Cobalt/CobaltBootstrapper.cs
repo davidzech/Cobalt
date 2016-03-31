@@ -37,13 +37,13 @@ namespace Cobalt
                 .Cast<ExportedDelegate>()
                 .Select(exportedDelegate => (StartupTask)exportedDelegate.CreateDelegate(typeof(StartupTask)));
 
-            startupTasks.Apply(s => s());            
+            startupTasks.Apply(s => s());
             base.OnStartup(sender, e);
-            await NatHelper.DiscoverAsync();
             ThemeManager.AddAppTheme("CobaltLight", new Uri("pack://application:,,,/Themes/CobaltLight.xaml"));
             ThemeManager.AddAppTheme("CobaltDark", new Uri("pack://application:,,,/Themes/CobaltDark.xaml"));
             ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.Accents.First(a => a.Name == "Blue"),
-            ThemeManager.GetAppTheme("CobaltLight"));
+                ThemeManager.GetAppTheme("CobaltLight"));
+            await NatHelper.DiscoverAsync();
         }
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

@@ -134,20 +134,17 @@ namespace Cobalt.Core.Tests
         {
             try
             {
-                Task t = Task.Delay(5000, stoken.Token);
+                Task t = Task.Delay(10000, stoken.Token);
                 IrcConnection c = new IrcConnection();
                 bool caughtError = false;
                 c.ConnectionError += (sender, error) =>
                 {
                     Debug.WriteLine(error.ToString());
-                    Assert.IsTrue(error.Exception is SocketException);
-                    SocketException se = error.Exception as SocketException;
-                    Assert.IsTrue(se.SocketErrorCode == SocketError.ConnectionRefused);
                     caughtError = true;
                     stoken.Cancel();
                 };
-                await c.ConnectAsync("irc.memers.co", 6668, false, "Test", "Test", "Test", false);
-                Assert.IsFalse(c.State == IrcConnectionState.Disconnected);
+                await c.ConnectAsync("irc.rizon.net", 12345, false, "Test", "Test", "Test", false);
+                Assert.IsTrue(c.State == IrcConnectionState.Disconnected);
                 await t;
                 Assert.IsTrue(caughtError);
             }

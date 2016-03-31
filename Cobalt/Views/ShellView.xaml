@@ -13,12 +13,21 @@
         xmlns:b="clr-namespace:Cobalt.Behaviors"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1000" ResizeMode="CanResizeWithGrip"
-        TextOptions.TextFormattingMode="Display"         
+        TextOptions.TextFormattingMode="Display"      
+        BorderThickness="1"
+        BorderBrush="{DynamicResource AccentColorBrush}"
         GlowBrush="{DynamicResource AccentColorBrush}"
         NonActiveGlowBrush="{DynamicResource NonActiveGlowBrush}"
         NonActiveBorderBrush="Transparent"
         Style="{DynamicResource CleanWindowStyleKey}"
         dialog:DialogParticipation.Register="{Binding}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <controls:MetroWindow.TitleTemplate>
         <DataTemplate>
         </DataTemplate>
@@ -43,13 +52,6 @@
             </controls:FlyoutsControl.ItemContainerStyle>
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

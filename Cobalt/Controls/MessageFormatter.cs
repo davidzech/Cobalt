@@ -3,10 +3,11 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
+using CobaltSettings.Annotations;
 
 namespace Cobalt.Controls
 {
-    public class MessageFormatter
+    public static class MessageFormatter
     {
         private class MessageTextRunProperties : TextRunProperties
         {
@@ -41,20 +42,19 @@ namespace Cobalt.Controls
 
         private class MessageParagraphProperties : TextParagraphProperties
         {
-            private readonly TextRunProperties _defaultProperties;
-
             public override FlowDirection FlowDirection => FlowDirection.LeftToRight;
             public override TextAlignment TextAlignment => TextAlignment.Left;
             public override double LineHeight => 0.0;
             public override bool FirstLineInParagraph => false;
-            public override TextRunProperties DefaultTextRunProperties => _defaultProperties;
+            public override TextRunProperties DefaultTextRunProperties { get; }
+
             public override TextWrapping TextWrapping => TextWrapping.Wrap;
             public override TextMarkerProperties TextMarkerProperties => null;
             public override double Indent => 0.0;
 
             public MessageParagraphProperties(TextRunProperties defaultTextRunProperties)
             {
-                _defaultProperties = defaultTextRunProperties;
+                DefaultTextRunProperties = defaultTextRunProperties;
             }
         }
 
@@ -93,10 +93,10 @@ namespace Cobalt.Controls
                                 (span.Flags & MessageSpanFlags.Bold) > 0 ? FontWeights.Bold : FontWeights.Normal,
                                 DefaultRunProperties.Typeface.Stretch),
                                 DefaultRunProperties.FontRenderingEmSize,
-                                (span.Flags & MessageSpanFlags.Reverse) > 0 ? _background :
-                                ((span.Flags & MessageSpanFlags.Foreground) > 0 ? _palette["Color" + span.Foreground] : _runProperties.ForegroundBrush),
-                                (span.Flags & MessageSpanFlags.Reverse) > 0 ? _runProperties.ForegroundBrush :
-                                ((span.Flags & MessageSpanFlags.Background) > 0 ? _palette["Color" + span.Background] : _runProperties.BackgroundBrush),
+                                (span.Flags & MessageSpanFlags.Reverse) > 0 ? Background :
+                                ((span.Flags & MessageSpanFlags.Foreground) > 0 ? Pallete["Color" + span.Foreground] : props.ForegroundBrush),
+                                (span.Flags & MessageSpanFlags.Reverse) > 0 ? props.ForegroundBrush :
+                                ((span.Flags & MessageSpanFlags.Background) > 0 ? Pallete["Color" + span.Background] : props.BackgroundBrush),
                                 (span.Flags & MessageSpanFlags.Underline) > 0);
                     }
                     end = span.End;
@@ -115,18 +115,13 @@ namespace Cobalt.Controls
             }
         }
 
-        public static readonly MessageFormatter Instance = new MessageFormatter();
-        public static MessageFormatter GetInstance() => Instance;
-        private readonly TextFormatter _formatter = TextFormatter.Create(TextFormattingMode.Display);
-        protected MessageFormatter()
-        {
-            
-        }
+        private static readonly TextFormatter Formatter = TextFormatter.Create(TextFormattingMode.Display);
 
         /*
          * Returns a list of TextLines to render, given the span provider and rendering width.
          */
-        public IEnumerable<TextLine> Format(MessageLine line, double width)
+        public static IEnumerable<TextLine> Format([NotNull]string text, ISpanProvider spans, double width, 
+            Typeface typeface, double fontSize, Brush foreground, Brush background, TextWrapping wrapping = TextWrapping.NoWrap)
         {
             if (width < 0)
             {
@@ -134,11 +129,15 @@ namespace Cobalt.Controls
             }
             int index = 0;
 
-            while (index < line.Text.Length)
+            while (index < text.Length)
             {
-                var formatted = _formatter.FormatLine(this, index, width, _paragraphProperties, null);
-                index += line.;
-                yield return line;
+                MessageTextRunProperties properties = new MessageTextRunProperties(typeface, fontSize, foreground,
+                    background, false);
+                MessageTextSource src = new MessageTextSource(text, spans, properties);
+                var formattedLine = Formatter.FormatLine(src, index, width, new MessageParagraphProperties(properties),
+                    null);
+                index += formattedLine.Length;                
+                yield return formattedLine;
             }
         }
     }

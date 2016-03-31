@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Media.TextFormatting;
 
 namespace Cobalt.Controls
 {
@@ -70,7 +69,7 @@ namespace Cobalt.Controls
         MessageSpan GetSpan(int index);
     }
 
-    public sealed class MessageLine : TextSource, ISpanProvider
+    public sealed class MessageLine : ISpanProvider
     {
         private static readonly Regex urlRegex = new Regex(@"(www\.|(http|https|ftp)+\:\/\/)[^\s\(\)]+", RegexOptions.IgnoreCase);
 

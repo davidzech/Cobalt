@@ -39,10 +39,9 @@ namespace Cobalt.Controls
 
         private void Collection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-
+            InvalidateAll();
         }
 
         public Typeface Typeface => null;
-        public double FontSize => 0.0;
     }
 }

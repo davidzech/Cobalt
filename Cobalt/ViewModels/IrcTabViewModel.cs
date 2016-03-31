@@ -5,19 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
+using Cobalt.Controls;
 using Cobalt.Core.Irc;
 
 namespace Cobalt.ViewModels
 {
-    public class IrcTabViewModel : Screen
+    public partial class IrcTabViewModel : Screen
     {
-        private IrcConnection _connection;
-        public IrcConnection Connection => _connection;        
+        public IrcConnection Connection { get; }
+
         public IObservableCollection<IrcTabViewModel> Children { get; } = new BindableCollection<IrcTabViewModel>();
+        public IObservableCollection<MessageLine> Messages { get; } = new BindableCollection<MessageLine>();
 
         public IrcTabViewModel(IrcConnection connection)
         {
-            _connection = connection;
+            Connection = connection;            
+            SubscribeIrcEvents();
         }
 
         public void AddChild(IrcTabViewModel child)
@@ -68,6 +71,18 @@ namespace Cobalt.ViewModels
             set
             {
                 _isSelected = value;
+                NotifyOfPropertyChange();
+            }
+        }
+
+        private int _bufferLines = 100;
+
+        public int BufferLines
+        {
+            get { return _bufferLines; }
+            set
+            {
+                _bufferLines = value;
                 NotifyOfPropertyChange();
             }
         }

@@ -10,7 +10,7 @@ using MahApps.Metro.Controls.Dialogs;
 
 namespace Cobalt.ViewModels.Flyouts
 {
-    public class NetworksFlyoutViewModel : FlyoutViewModelBase
+    public sealed class NetworksFlyoutViewModel : FlyoutViewModelBase
     {
         public override string Header
         {
@@ -115,7 +115,6 @@ namespace Cobalt.ViewModels.Flyouts
             var tab = new IrcTabViewModel(connection) {DisplayName = SelectedNetwork.Name};
             svm?.ActivateItem(tab);
             IsOpen = false;
-            await Task.Yield();
             var nickName = SelectedNetwork?.UserProfile?.Nickname1 ?? _settings.RootElement.DefaultProfile.Nickname1;
             var fullName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
             var userName = SelectedNetwork?.UserProfile?.FullName ?? _settings.RootElement.DefaultProfile.FullName;
@@ -123,7 +122,7 @@ namespace Cobalt.ViewModels.Flyouts
             await
                 connection.ConnectAsync(SelectedNetwork.Hostname, SelectedNetwork.Port, SelectedNetwork.IsSecure,
                     nickName, userName, fullName,
-                    SelectedNetwork.AutoReconnect, SelectedNetwork.Password, false, true);
+                    SelectedNetwork.AutoReconnect, SelectedNetwork.Password);
         }
 
         private async void NetworksFlyoutViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

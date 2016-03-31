@@ -47,6 +47,7 @@ namespace Cobalt.Core.Irc
                 if (firstCompletedTask == connectTimeoutTask)
                 {
                     State = IrcConnectionState.Disconnected;
+                    OnConnectionError(new ErrorEventArgs($"Connection to {Hostname}:{Port} timed out"));
                 }
                 else
                 {
