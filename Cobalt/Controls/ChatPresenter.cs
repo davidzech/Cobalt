@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cobalt.Controls
 {
@@ -32,14 +22,13 @@ namespace Cobalt.Controls
         static ChatPresenter()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof (ChatPresenter),
-                new FrameworkPropertyMetadata(typeof (ChatPresenter)));
+                new FrameworkPropertyMetadata(typeof (ChatPresenter)));           
         }
 
         public ChatPresenter()
         {
             MessagesSource = new List<MessageLine>();
-        }
-                
+        }                
 
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -56,9 +45,10 @@ namespace Cobalt.Controls
             int curLine = 0;
             var guidelines = new GuidelineSet();
 
-            foreach (var message in MessagesSource)
+            foreach (var message in MessagesSource.Reverse())
             {
-                // TODO cache rendering? probably not
+                // Render from bottom up
+                // refactor this block shit to not be terrible
                 using (Block b = new Block {Source = message})
                 {
 
@@ -66,13 +56,13 @@ namespace Cobalt.Controls
                     b.NickString = b.Source.NickName;
                     b.Foreground = Brushes.Black;
                     b.Time =
-                        MessageFormatter.Format(b.TimeString, null, this.ViewportWidth, this.Typeface, this.FontSize,
-                            this.Foreground, this.Background).FirstOrDefault();
+                        MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
+                            Foreground, Background).First();
                         // always take the first one for time formatting
                     b.Nick =
-                        MessageFormatter.Format(b.NickString, null, this.ViewportWidth - b.NickX, this.Typeface,
-                            this.FontSize,
-                            this.Foreground, this.Background).FirstOrDefault();
+                        MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
+                            FontSize,
+                            Foreground, Background).First();
 
                     b.TextX = _columnWidth + _separatorPadding*2.0 + 1.0;
 
@@ -81,18 +71,13 @@ namespace Cobalt.Controls
                     else
                         b.NickX = 0.0;
 
-                    // draw block
-                    b.Y = double.NaN;
-                    if (b.Text != null && b.Text.Length > 0)
-                    {
-                        foreach (var line in b.Text)
-                        {
-                            vPos = line.Height;
-                            _lineHeight = Math.Max(line.TextHeight, _lineHeight);
-                        }
-                        b.Height = b.Text.Sum((t) => t.Height);
-                    }
-                    b.Y = vPos;
+                    //b.Text = MessageFormatter.Format(b.Source.Text, null )
+
+                    b.Height = Math.Max(b.Nick.Height, b.Time.Height);
+
+                    // draw block                                        
+                    b.Y = vPos - b.Height;
+                    vPos -= b.Height;                    
                     b.Nick?.Draw(drawingContext, new Point(b.NickX, b.Y), InvertAxes.None);
                     b.Time?.Draw(drawingContext, new Point(0.0, b.Y), InvertAxes.None);
                     double accumulator = 0.0;

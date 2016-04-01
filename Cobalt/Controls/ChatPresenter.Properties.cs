@@ -43,6 +43,9 @@ namespace Cobalt.Controls
             InvalidateAll();
         }
 
-        public Typeface Typeface => null;
+        private Typeface GetTypeFace()
+        {
+            return new Typeface(FontFamily, FontStyle, FontWeight, FontStretch);
+        }
     }
 }

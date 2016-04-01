@@ -61,18 +61,13 @@ namespace Cobalt.ViewModels.Flyouts
             get { return _selectedChannel; }
             set
             {
-                if (_selectedChannel != value)
-                {
-                    _selectedChannel = value;
-                    NotifyOfPropertyChange();
-                }
+                _selectedChannel = value;
+                NotifyOfPropertyChange();
+                NotifyOfPropertyChange(() => CanRemoveChannel);
             }
         }
 
-        public bool CanAddChannel()
-        {
-            return _selectedNetwork != null;
-        }
+        public bool CanAddChannel => SelectedNetwork != null;
 
         public void AddChannel()
         {
@@ -81,10 +76,7 @@ namespace Cobalt.ViewModels.Flyouts
             SelectedChannel = add;
         }
 
-        public bool CanRemoveChannel()
-        {
-            return _selectedChannel != null;
-        }
+        public bool CanRemoveChannel => SelectedChannel != null;
 
         public void RemoveChannel()
         {

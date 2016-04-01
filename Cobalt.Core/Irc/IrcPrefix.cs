@@ -100,9 +100,9 @@ namespace Cobalt.Core.Irc
 		/// <summary>
 		/// Gets the name of the server.
 		/// </summary>
-		public string ServerName { get { return this.Prefix; } }
+		public string ServerName => Prefix;
 
-		internal IrcServer(string serverName)
+	    internal IrcServer(string serverName)
 			: base(serverName)
 		{
 		}

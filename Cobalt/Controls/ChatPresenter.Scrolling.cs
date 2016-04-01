@@ -1,4 +1,4 @@
-﻿using System;
+﻿                                                                            using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,7 @@ namespace Cobalt.Controls
 {
     internal partial class ChatPresenter
     {
-        public bool IsAutoScrolling { get { return _isAutoScrolling; } }
+        public bool IsAutoScrolling => _isAutoScrolling;
         public bool CanHorizontallyScroll { get { return false; } set { } }
         public bool CanVerticallyScroll { get { return true; } set { } }
         public double ExtentHeight { get { return _lineHeight * _bufferLines; } }
@@ -118,10 +118,7 @@ namespace Cobalt.Controls
 
         public void InvalidateScrollInfo()
         {
-            if (_viewer != null)
-            {
-                _viewer.InvalidateScrollInfo();
-            }
+            _viewer?.InvalidateScrollInfo();
         }
 
         public int VisibleLineCount

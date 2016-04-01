@@ -76,9 +76,9 @@ namespace Cobalt.ViewModels
             }
         }
 
-        private void Write(MessageType type, IrcPrefix from, string text, bool attention = false, int colorHashCode = 0)
+        private void Write(MessageType type, IrcPeer from, string text, bool attention = false, int colorHashCode = 0)
         {
-            Write(type, from.Prefix, text, attention, colorHashCode);
+            Write(type, from.Nickname, text, attention, colorHashCode);
         }
     }
 }

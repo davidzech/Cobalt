@@ -166,6 +166,7 @@ namespace Cobalt.Controls
             }
             span.End = index;
             spans.Add(span);
+            line.Time = time;
             line.Text = builder.ToString();
             line.Spans = spans.Where(s => s.End > s.Start).ToArray();
             line.Links =

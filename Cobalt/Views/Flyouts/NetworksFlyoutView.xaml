@@ -100,10 +100,10 @@
                                     <CheckBox x:Name="checkBox" Content="Override Default User Info" IsChecked="{Binding SelectedNetwork.OverrideGlobalProfile}" />
                                     <StackPanel IsEnabled="{Binding IsChecked, ElementName=checkBox, FallbackValue=Collapsed, Mode=TwoWay}">
                                         <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.Nickname1}" controls:TextBoxHelper.Watermark="Nickname"/>
-                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.Nickname2}" controls:TextBoxHelper.Watermark="Second Alternative"/>
-                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.Username}" controls:TextBoxHelper.Watermark="Username"/>
-                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.FullName}" controls:TextBoxHelper.Watermark="Full Name"/>
-                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedChannel.UserProfile.NickservPassword}" controls:TextBoxHelper.Watermark="Nickserv Password"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.Nickname2}" controls:TextBoxHelper.Watermark="Second Alternative"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.Username}" controls:TextBoxHelper.Watermark="Username"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.FullName}" controls:TextBoxHelper.Watermark="Full Name"/>
+                                        <TextBox Margin="0 10 0 0" Text="{Binding SelectedNetwork.UserProfile.NickservPassword}" controls:TextBoxHelper.Watermark="Nickserv Password"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

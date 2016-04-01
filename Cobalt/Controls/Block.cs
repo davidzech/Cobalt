@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
 
@@ -14,7 +16,7 @@ namespace Cobalt.Controls
 
         public TextLine Time;
         public TextLine Nick;
-        public TextLine[] Text;
+        public IList<TextLine> Text = new List<TextLine>();
 
         public int CharStart;
         public int CharEnd;
@@ -38,11 +40,14 @@ namespace Cobalt.Controls
         {
             if (disposing)
             {
-                Time.Dispose();
-                Nick.Dispose();
-                foreach (var textLine in Text)
+                Time?.Dispose();
+                Nick?.Dispose();
+                if (Text != null)
                 {
-                    textLine.Dispose();
+                    foreach (var textLine in Text)
+                    {
+                        textLine?.Dispose();
+                    }
                 }
             }        
         }
