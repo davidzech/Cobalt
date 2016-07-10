@@ -48,7 +48,7 @@ namespace Cobalt.Controls
             foreach (var message in MessagesSource.Reverse())
             {
                 // Render from bottom up
-                // refactor this block shit to not be terrible
+                // TODO refactor this block shit to not be terrible
                 using (Block b = new Block {Source = message})
                 {
 
@@ -59,21 +59,22 @@ namespace Cobalt.Controls
                         MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
                             Foreground, Background).First();
                         // always take the first one for time formatting
+                    b.NickX = b.Time.WidthIncludingTrailingWhitespace;
+                   
                     b.Nick =
                         MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
                             FontSize,
                             Foreground, Background).First();
 
-                    b.TextX = _columnWidth + _separatorPadding*2.0 + 1.0;
-
-                    if (b.Nick != null)
-                        b.NickX = _columnWidth + b.Nick.WidthIncludingTrailingWhitespace;
-                    else
-                        b.NickX = 0.0;
+                    b.TextX = b.NickX + b.Nick.WidthIncludingTrailingWhitespace;
+                    _columnWidth = b.TextX;
 
                     //b.Text = MessageFormatter.Format(b.Source.Text, null )
+                    b.Text = MessageFormatter.Format(b.Source.Text, b.Source, this.ViewportWidth, GetTypeFace(),
+                        this.FontSize, this.Foreground, this.Background);
 
-                    b.Height = Math.Max(b.Nick.Height, b.Time.Height);
+
+                    b.Height = b.Nick != null ? Math.Max(b.Nick.Height, b.Time.Height) : b.Time.Height;
 
                     // draw block                                        
                     b.Y = vPos - b.Height;
@@ -84,10 +85,10 @@ namespace Cobalt.Controls
 
                     if (b.Text != null)
                     {
-                        foreach (var line in b.Text)
+                        foreach (var textLine in b.Text)
                         {
-                            line.Draw(drawingContext, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
-                            accumulator += line.TextHeight;
+                            textLine.Draw(drawingContext, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
+                            accumulator += textLine.TextHeight;
                         }
                     }
                 }

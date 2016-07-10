@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
@@ -103,6 +104,11 @@ namespace Cobalt.ViewModels
         public void DragCancelled()
         {
             DragDrop.DefaultDragHandler.DragCancelled();
+        }
+
+        public bool TryCatchOccurredException(Exception exception)
+        {
+            return false;
         }
 
         public void DragOver(IDropInfo dropInfo)

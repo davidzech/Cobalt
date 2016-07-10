@@ -16,7 +16,7 @@ namespace Cobalt.Controls
 
         public TextLine Time;
         public TextLine Nick;
-        public IList<TextLine> Text = new List<TextLine>();
+        public IEnumerable<TextLine> Text = new List<TextLine>();
 
         public int CharStart;
         public int CharEnd;
