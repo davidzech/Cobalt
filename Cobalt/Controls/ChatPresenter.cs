@@ -42,10 +42,8 @@ namespace Cobalt.Controls
                 return;
             var m = visual.CompositionTarget.TransformToDevice;
 
-            DrawMessages(drawingContext);
+            FormatAndDrawAllMessages(drawingContext);
             DrawSeparatorLine(drawingContext, m.M11);
-
-            this.Height = LineHeight*_totalLines;
         }
 
         private void DrawSeparatorLine(DrawingContext dc, double dpi = 1.0)
@@ -60,65 +58,69 @@ namespace Cobalt.Controls
             dc.DrawLine(p, new Point(offsetX, 0.0), new Point(offsetX, ActualHeight));
         }
 
-        private void DrawBlock(DrawingContext dc, Block b)
+        private void DrawBlock(DrawingContext ctx, Block b, double yPos)
         {
             
         }
 
-        private void DrawMessages(DrawingContext drawingContext, double dpi = 1.0)
+        private void RenderVirtualizedMessages(DrawingContext ctx, double dpi = 1.0)
+        {
+            
+        }
+
+        private void FormatAndDrawAllMessages(DrawingContext ctx, double dpi = 1.0)
         {
             _blocks.Clear();
             _totalLines = 0;
-            double vPos = 0.0;
+            double vPos = -(_scrollPos * LineHeight);
             foreach (var message in MessagesSource)
             {
-                Block b = new Block {Source = message};
+                Block b = new Block { Source = message };
                 {
                     b.TimeString = b.Source.Time.ToShortDateString();
-                    b.NickString = b.Source.NickName;                    
-                    var time = 
+                    b.NickString = b.Source.NickName;
+                    var time =
                         MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
-                            Foreground, Background).First();               
+                            Foreground, Background).First();
 
                     b.TimeWidth = time.WidthIncludingTrailingWhitespace;
 
                     var nick =
                         MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
                             FontSize,
-                            Foreground, Background).First();
+                            Foreground, Background).FirstOrDefault();
 
-                    b.NickWidth = nick.WidthIncludingTrailingWhitespace;
+                    b.NickWidth = nick?.WidthIncludingTrailingWhitespace ?? 0;
 
                     // update the separator line, pushing it out to fit longest nick
-                    double testOffset = time.WidthIncludingTrailingWhitespace + TimeNickSeparatorPadding +
-                                        nick.WidthIncludingTrailingWhitespace + SeparatorPadding;
+                    double testOffset = b.TimeWidth + TimeNickSeparatorPadding +
+                                        b.NickWidth + SeparatorPadding;
                     if (testOffset > _separatorOffsetX)
                     {
                         _separatorOffsetX = testOffset;
                     }
 
                     // nick goes left of Separator
-                    b.NickX = _separatorOffsetX - (SeparatorPadding + nick.WidthIncludingTrailingWhitespace);
+                    b.NickX = _separatorOffsetX - (SeparatorPadding + b.NickWidth);
                     // text goes right of separator
-                    b.TextX = _separatorOffsetX + (SeparatorPadding);                    
+                    b.TextX = _separatorOffsetX + (SeparatorPadding);
 
                     var text = MessageFormatter.Format(b.Source.Text, b.Source, ViewportWidth - b.TextX, GetTypeFace(),
                         FontSize, Foreground, Background);
                     b.NumLines = text.Count;
-                    _totalLines += Math.Max(1, text.Count);
-
-                    b.Height = Math.Max(1, text.Count)*LineHeight;
+                    _totalLines += Math.Max(1, text.Count);                    
+                    b.Height = Math.Max(1, text.Count) * LineHeight;
 
                     // draw block                                        
                     b.Y = vPos;
                     vPos += b.Height;
-                    nick.Draw(drawingContext, new Point(b.NickX, b.Y), InvertAxes.None);
-                    time.Draw(drawingContext, new Point(0.0, b.Y), InvertAxes.None);
+                    nick?.Draw(ctx, new Point(b.NickX, b.Y), InvertAxes.None);
+                    time.Draw(ctx, new Point(0.0, b.Y), InvertAxes.None);
                     double accumulator = 0.0;
 
                     foreach (var textLine in text)
                     {
-                        textLine.Draw(drawingContext, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
+                        textLine.Draw(ctx, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
                         accumulator += textLine.TextHeight;
                         textLine.Dispose();
                     }

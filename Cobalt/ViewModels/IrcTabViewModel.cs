@@ -30,6 +30,11 @@ namespace Cobalt.ViewModels
             SubscribeIrcEvents();
         }
 
+        ~IrcTabViewModel()
+        {
+            UnsubscribeIrcEvents();
+        }
+
         private bool _isExpanded = true;
 
         public bool IsExpanded

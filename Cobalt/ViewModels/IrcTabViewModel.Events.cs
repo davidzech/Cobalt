@@ -18,6 +18,11 @@ namespace Cobalt.ViewModels
             Connection.Noticed += Connection_Noticed;
             Connection.PrivateMessaged += Connection_PrivateMessaged;
             Connection.SelfJoined += Connection_SelfJoined;
+            Connection.InfoReceived += Connection_InfoReceived;
+        }
+
+        protected virtual void Connection_InfoReceived(object sender, IrcInfoEventArgs e)
+        {
         }
 
         protected virtual void Connection_SelfJoined(object sender, IrcJoinEventArgs e)
@@ -30,7 +35,7 @@ namespace Cobalt.ViewModels
             Connection.ConnectionError -= Connection_ConnectionError;
             Connection.Noticed -= Connection_Noticed;
             Connection.PrivateMessaged -= Connection_PrivateMessaged;
-            Connection.SelfJoined -= Connection_SelfJoined;
+            Connection.SelfJoined -= Connection_SelfJoined;            
         }
 
         protected virtual void Connection_PrivateMessaged(object sender, Core.Irc.IrcMessageEventArgs e)
@@ -59,6 +64,10 @@ namespace Cobalt.ViewModels
 
         public void Write(MessageType type, string nick, string text, bool attention = false, int colorHashCode = 0)
         {
+            if (nick == null)
+            {
+                nick = "";
+            }
             MessageLine ml = MessageLine.Process(type, MessageMarker.None, nick, text, DateTime.Now);
             Messages.Add(ml);
             while(Messages.Count > BufferLines)
@@ -69,7 +78,7 @@ namespace Cobalt.ViewModels
 
         public void Write(MessageType type, IrcPeer from, string text, bool attention = false, int colorHashCode = 0)
         {
-            Write(type, from.Nickname, text, attention, colorHashCode);
+            Write(type, from?.Nickname, text, attention, colorHashCode);
         }
     }
 }

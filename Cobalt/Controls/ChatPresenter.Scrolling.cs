@@ -20,32 +20,32 @@ namespace Cobalt.Controls
 
         public void LineUp()
         {
-            ScrollTo(_scrollPos + 1);
+            ScrollTo(_scrollPos - 1);
         }
 
         public void LineDown()
         {
-            ScrollTo(_scrollPos - 1);
+            ScrollTo(_scrollPos + 1);
         }
 
         public void MouseWheelUp()
         {
-            ScrollTo(_scrollPos + SystemParameters.WheelScrollLines);
+            ScrollTo(_scrollPos - SystemParameters.WheelScrollLines);
         }
 
         public void MouseWheelDown()
         {
-            ScrollTo(_scrollPos - SystemParameters.WheelScrollLines);
+            ScrollTo(_scrollPos + SystemParameters.WheelScrollLines);
         }
 
         public void PageUp()
         {
-            ScrollTo(_scrollPos + VisibleLineCount - 1);
+            ScrollTo(_scrollPos - (VisibleLineCount - 1));
         }
 
         public void PageDown()
         {
-            ScrollTo(_scrollPos - VisibleLineCount + 1);
+            ScrollTo(_scrollPos + (VisibleLineCount - 1));
         }
 
         protected override Size MeasureOverride(Size constraint)
@@ -56,7 +56,7 @@ namespace Cobalt.Controls
             }
             else
             {
-                ViewportHeight = (constraint.Height / LineHeight);
+                ViewportHeight = Math.Round(constraint.Height / LineHeight);
             }
             InvalidateScrollInfo();
             return new Size(ViewportHeight * LineHeight, ViewportWidth);
@@ -64,9 +64,7 @@ namespace Cobalt.Controls
 
         public void ScrollTo(int pos)
         {
-            pos = Math.Max(0, Math.Min(_totalLines - VisibleLineCount + 1, pos));
-
-            var delta = (pos - _scrollPos) * LineHeight;
+            pos = Math.Max(0, Math.Min(_totalLines - VisibleLineCount, pos));
             _scrollPos = pos;
 
             InvalidateVisual();
@@ -77,7 +75,8 @@ namespace Cobalt.Controls
 
         public void SetVerticalOffset(double offset)
         {
-            int pos = _totalLines - (int)((offset + ViewportHeight) / LineHeight);
+            // what pos is it?
+            int pos = Convert.ToInt32(offset);            
             ScrollTo(pos);
         }
 
@@ -125,6 +124,6 @@ namespace Cobalt.Controls
             _viewer?.InvalidateScrollInfo();
         }
 
-        public int VisibleLineCount => Convert.ToInt32(ActualHeight / LineHeight);
+        public int VisibleLineCount => Convert.ToInt32(ViewportHeight);
     }
 }

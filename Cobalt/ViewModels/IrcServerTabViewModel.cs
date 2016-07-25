@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Converters;
 using Caliburn.Micro;
+using Cobalt.Controls;
 using Cobalt.Core.Irc;
 using Cobalt.Settings;
 using Cobalt.Settings.Elements;
@@ -58,6 +59,18 @@ namespace Cobalt.ViewModels
             }
         }
 
+        protected override void Connection_Noticed(object sender, IrcMessageEventArgs e)
+        {
+            base.Connection_Noticed(sender, e);
+            Write(MessageType.Notice, e?.From?.Nickname ?? "*", e?.Text ?? "");
+        }
+
+        protected override void Connection_InfoReceived(object sender, IrcInfoEventArgs e)
+        {
+            base.Connection_InfoReceived(sender, e);
+            Write(MessageType.ServerInfo, "*", e.Text);
+        }
+
         protected override async void Connection_StateChanged(object sender, EventArgs e)
         {
             base.Connection_StateChanged(sender, e);
@@ -78,6 +91,12 @@ namespace Cobalt.ViewModels
                     }
                 }
             }                 
+        }
+
+        protected override void Connection_ConnectionError(object sender, ErrorEventArgs e)
+        {
+            base.Connection_ConnectionError(sender, e);
+            Write(MessageType.Info, "", e.Message);
         }
     }
 }

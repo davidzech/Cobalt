@@ -16,7 +16,7 @@ namespace Cobalt.ViewModels
             if (!e.Handled && e.To.IsChannel && e.To.Name == this.ChannelName) 
             {
                 for(int i = 0; i < 50; i++)
-                Write(MessageType.Default, e.From, e.Text);
+                Write(MessageType.Default, e.From, e.Text + i);
             }
         }
     }
