@@ -35,12 +35,14 @@ namespace Cobalt.Controls
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);             
+            base.OnRender(drawingContext);                         
 
             var visual = PresentationSource.FromVisual(this);
             if (visual?.CompositionTarget == null)
                 return;
             var m = visual.CompositionTarget.TransformToDevice;
+
+            drawingContext.DrawRectangle(Background, null, new Rect(new Size(ActualWidth, ActualHeight)));
 
             FormatAndDrawAllMessages(drawingContext);
             DrawSeparatorLine(drawingContext, m.M11);

@@ -7,8 +7,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" x:Name="Box">
     <Grid>
-        <ScrollViewer x:Name="ScrollViewer" CanContentScroll="True" >
-            <local:ChatPresenter  VerticalAlignment="Top"  SnapsToDevicePixels="True" MessagesSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:ChatBox}}, Path=MessagesSource, Mode=TwoWay}" MinHeight="{Binding ActualHeight, ElementName=ScrollViewer, Mode=OneWay}" />
+        <ScrollViewer  x:Name="ScrollViewer" CanContentScroll="True" >
+            <local:ChatPresenter Background="Transparent" VerticalAlignment="Top" 
+                                 SnapsToDevicePixels="True"
+                                 MessagesSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:ChatBox}}, Path=MessagesSource, Mode=TwoWay}" 
+                                 MinHeight="{Binding ActualHeight, ElementName=ScrollViewer, Mode=OneWay}" />
         </ScrollViewer>
     </Grid>
 </UserControl>

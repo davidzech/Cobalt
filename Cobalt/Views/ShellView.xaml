@@ -20,7 +20,8 @@
         NonActiveGlowBrush="{DynamicResource NonActiveGlowBrush}"
         NonActiveBorderBrush="Transparent"
         Style="{DynamicResource CleanWindowStyleKey}"
-        dialog:DialogParticipation.Register="{Binding}">
+        dialog:DialogParticipation.Register="{Binding}"
+        SnapsToDevicePixels="True">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -96,7 +97,7 @@
                     </ContextMenu>
                 </TreeView.Resources>
                 <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}" d:DataContext="{d:DesignInstance Type=vm:IrcTabViewModel}">
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"  />
                         <Setter Property="AllowDrop" Value="True"/>
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />

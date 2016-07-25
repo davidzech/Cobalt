@@ -109,6 +109,7 @@
     <Compile Include="Controls\ChatBox.xaml.cs">
       <DependentUpon>ChatBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ChatPresenter.Events.cs" />
     <Compile Include="Controls\IBlock.cs" />
     <Compile Include="Controls\MessageFormatter.cs" />
     <Compile Include="Controls\MessageLine.cs" />
