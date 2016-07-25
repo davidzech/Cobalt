@@ -91,9 +91,10 @@ namespace Cobalt.ViewModels
             MessageBox.Show("Reconnect");
         }
 
-        public void Close()
-        {
+        public async void Close()
+        {        
             TryClose();
+            await Connection.QuitAsync("Leaving").ConfigureAwait(false);
         }       
     }
 }

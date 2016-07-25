@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Cobalt.Controls;
 using Cobalt.Core.Irc;
 
@@ -34,19 +35,8 @@ namespace Cobalt.ViewModels
 
         protected virtual void Connection_PrivateMessaged(object sender, Core.Irc.IrcMessageEventArgs e)
         {
-            // check if ignored 
-
-            if (!IsServer)
-            {
-                if (IsChannel)
-                {
-                    // TODO Handle color and attention
-                    Write(MessageType.Default, e.From, e.Text);
-                }
-            }
+            // check if ignored            
         }
-
-
 
         protected virtual void Connection_Noticed(object sender, Core.Irc.IrcMessageEventArgs e)
         {            
@@ -58,15 +48,16 @@ namespace Cobalt.ViewModels
 
         protected virtual void Connection_StateChanged(object sender, EventArgs e)
         {
-            var state = Connection.State;
-            if (state != IrcConnectionState.Connected)
-            {
-                // TODO change notify state
-                this.IsConnected = false;                
-            }
+                var state = Connection.State;
+                if (state != IrcConnectionState.Connected)
+                {
+                    // TODO change notify state
+                    this.IsConnected = false;
+                }
+         
         }
 
-        private void Write(MessageType type, string nick, string text, bool attention = false, int colorHashCode = 0)
+        public void Write(MessageType type, string nick, string text, bool attention = false, int colorHashCode = 0)
         {
             MessageLine ml = MessageLine.Process(type, MessageMarker.None, nick, text, DateTime.Now);
             Messages.Add(ml);
@@ -76,7 +67,7 @@ namespace Cobalt.ViewModels
             }
         }
 
-        private void Write(MessageType type, IrcPeer from, string text, bool attention = false, int colorHashCode = 0)
+        public void Write(MessageType type, IrcPeer from, string text, bool attention = false, int colorHashCode = 0)
         {
             Write(type, from.Nickname, text, attention, colorHashCode);
         }

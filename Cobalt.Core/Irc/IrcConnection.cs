@@ -351,11 +351,15 @@ namespace Cobalt.Core.Irc
         /// </summary>
         /// <param name="command">The name of the command.</param>
         /// <param name="parameters">The optional command parameters.</param>
-        public async Task SendAsync(string command, params string[] parameters)
+        public Task SendAsync(string command, params string[] parameters)
         {
             if (State != IrcConnectionState.Disconnected)
             {
-                await PostMessageAsync(new IrcMessage(command, parameters));
+                return PostMessageAsync(new IrcMessage(command, parameters));
+            }
+            else
+            {
+                return default(Task);
             }
         }
 
@@ -469,9 +473,30 @@ namespace Cobalt.Core.Irc
         /// </summary>
         /// <param name="channel">The name of the channel to join.</param>
         /// <param name="key">The key required to join the channel.</param>
-        public async Task JoinAsync(string channel, string key)
+        public Task JoinAsync(string channel, string key)
         {
-            await SendAsync("JOIN", channel, key);
+            return SendAsync("JOIN", channel, key);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="channels"></param>
+        /// <returns></returns>
+        public Task JoinAsync(IEnumerable<Tuple<string, string>> channels)
+        {
+            List<string> pairs = new List<string>();
+            foreach (var channel in channels)
+            {
+                string str = channel.Item1;
+                if (!string.IsNullOrEmpty(channel.Item2))
+                {
+                    str += $" {channel.Item2}";
+                }
+                pairs.Add(str);
+            }
+            string cmd = string.Join(",", pairs);
+            return SendAsync("JOIN", cmd);
         }
 
         /// <summary>
@@ -479,12 +504,12 @@ namespace Cobalt.Core.Irc
         /// </summary>
         /// <param name="channel">The channel to leave.</param>
         /// <param name="message"></param>
-        public async Task PartAsync(string channel, string message = null)
+        public Task PartAsync(string channel, string message = null)
         {
             if (message != null)
-                await SendAsync("PART", channel, message);
+                return SendAsync("PART", channel, message);
             else
-                await SendAsync("PART", channel);
+                return SendAsync("PART", channel);
 
         }
 

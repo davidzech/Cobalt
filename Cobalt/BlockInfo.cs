@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Media;
-using System.Windows.Media.TextFormatting;
-
-namespace Cobalt.Controls
+﻿namespace Cobalt.Controls
 {
-    public class Block : IBlock
-    {       
+    public sealed class RenderBlock : IBlock
+    {
         public MessageLine Source { get; set; }
         public string TimeString { get; set; }
         public string NickString { get; set; }
@@ -19,6 +13,6 @@ namespace Cobalt.Controls
         public double Height { get; set; }
         public double TimeWidth { get; set; }
         public double NickWidth { get; set; }
-        public int NumLines { get; set; }     
+        public int NumLines { get; set; }
     }
 }

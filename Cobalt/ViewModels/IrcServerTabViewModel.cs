@@ -69,20 +69,7 @@ namespace Cobalt.ViewModels
                 {
                     // this is first on connect
                     HasConnectedAlready = true;
-
-                    foreach (var channelPair in AutoJoinChannels)
-                    {
-                        var channel = channelPair.Item1;
-                        var password = channelPair.Item2;
-                        if (!string.IsNullOrEmpty(password))
-                        {
-                            await Connection.JoinAsync(channel, password);
-                        }
-                        else
-                        {
-                            await Connection.JoinAsync(channel);
-                        }
-                    }
+                    await Connection.JoinAsync(AutoJoinChannels);
 
                     // TODO execute commands
                     foreach (var cmd in ConnectCommands)

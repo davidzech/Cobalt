@@ -10,7 +10,7 @@ using Cobalt.Settings.Elements;
 
 namespace Cobalt.ViewModels
 {
-    public class IrcChannelTabViewModel : IrcTabViewModel
+    public partial class IrcChannelTabViewModel : IrcTabViewModel
     {
         private IrcServerTabViewModel _parentTab;
 

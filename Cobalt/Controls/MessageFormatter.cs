@@ -120,9 +120,10 @@ namespace Cobalt.Controls
         /*
          * Returns a list of TextLines to render, given the span provider and rendering width.
          */
-        public static IEnumerable<TextLine> Format([NotNull]string text, ISpanProvider spans, double width, 
+        public static IList<TextLine> Format([NotNull]string text, ISpanProvider spans, double width, 
             Typeface typeface, double fontSize, Brush foreground, Brush background, TextWrapping wrapping = TextWrapping.NoWrap)
         {
+            IList<TextLine> lines = new List<TextLine>();
             if (width < 0)
             {
                 width = 0;                
@@ -137,8 +138,9 @@ namespace Cobalt.Controls
                 var formattedLine = Formatter.FormatLine(src, index, width, new MessageParagraphProperties(properties),
                     null);
                 index += formattedLine.Length;                
-                yield return formattedLine;
+                lines.Add(formattedLine);
             }
+            return lines;
         }
     }
 }

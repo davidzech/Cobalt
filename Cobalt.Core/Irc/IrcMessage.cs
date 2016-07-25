@@ -67,7 +67,7 @@ namespace Cobalt.Core.Irc
 				}
 
 				sb.Append(' ');
-				if (i == this.Parameters.Count - 1 && !this.Raw)
+				if (i == this.Parameters.Count - 1 && Parameters[i].Contains(" ") && !this.Raw)
 					sb.Append(':');
 				sb.Append(this.Parameters[i]);
 			}

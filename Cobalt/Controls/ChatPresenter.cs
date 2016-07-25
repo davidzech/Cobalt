@@ -12,85 +12,118 @@ namespace Cobalt.Controls
     internal partial class ChatPresenter : Control, IScrollInfo
     {
         private ScrollViewer _viewer;
-        private int _bufferLines;
-        private int _scrollPos;
+        private int _totalLines;
+        private IList<IBlock> _blocks = new List<IBlock>();
+        private int _scrollPos = 0;
         private bool _isAutoScrolling = true;
-        private double _lineHeight = 0.0;
-        private double _separatorPadding = 6.0;
-        private double _columnWidth = 0.0;
+        private readonly double TimeNickSeparatorPadding = 6.0;
+        private readonly double SeparatorPadding = 6.0;
+        private double _separatorOffsetX;
 
         static ChatPresenter()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof (ChatPresenter),
-                new FrameworkPropertyMetadata(typeof (ChatPresenter)));           
+                new FrameworkPropertyMetadata(typeof (ChatPresenter)));                       
         }
 
         public ChatPresenter()
         {
             MessagesSource = new List<MessageLine>();
-        }                
+        }
+
+        private double LineHeight => FontSize*FontFamily.LineSpacing;
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
+            base.OnRender(drawingContext);             
 
             var visual = PresentationSource.FromVisual(this);
             if (visual?.CompositionTarget == null)
                 return;
             var m = visual.CompositionTarget.TransformToDevice;
-            var scaledPen = new Pen(null, 2.0/m.M11);
-            double guidelineHeight = scaledPen.Thickness;
 
-            double vPos = ActualHeight;
-            int curLine = 0;
+            DrawMessages(drawingContext);
+            DrawSeparatorLine(drawingContext, m.M11);
+
+            this.Height = LineHeight*_totalLines;
+        }
+
+        private void DrawSeparatorLine(DrawingContext dc, double dpi = 1.0)
+        {
             var guidelines = new GuidelineSet();
 
-            foreach (var message in MessagesSource.Reverse())
-            {
-                // Render from bottom up
-                // TODO refactor this block shit to not be terrible
-                using (Block b = new Block {Source = message})
-                {
+            double offsetX = _separatorOffsetX;
+            Pen p = new Pen(Brushes.Black, 1.0 / dpi);
+            guidelines.GuidelinesX.Add(Math.Ceiling(offsetX) + p.Thickness / 2);
+            guidelines.GuidelinesX.Add(Math.Ceiling(offsetX + 1) + p.Thickness / 2);
+            dc.PushGuidelineSet(guidelines);
+            dc.DrawLine(p, new Point(offsetX, 0.0), new Point(offsetX, ActualHeight));
+        }
 
+        private void DrawBlock(DrawingContext dc, Block b)
+        {
+            
+        }
+
+        private void DrawMessages(DrawingContext drawingContext, double dpi = 1.0)
+        {
+            _blocks.Clear();
+            _totalLines = 0;
+            double vPos = 0.0;
+            foreach (var message in MessagesSource)
+            {
+                Block b = new Block {Source = message};
+                {
                     b.TimeString = b.Source.Time.ToShortDateString();
-                    b.NickString = b.Source.NickName;
-                    b.Foreground = Brushes.Black;
-                    b.Time =
+                    b.NickString = b.Source.NickName;                    
+                    var time = 
                         MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
-                            Foreground, Background).First();
-                        // always take the first one for time formatting
-                    b.NickX = b.Time.WidthIncludingTrailingWhitespace;
-                   
-                    b.Nick =
+                            Foreground, Background).First();               
+
+                    b.TimeWidth = time.WidthIncludingTrailingWhitespace;
+
+                    var nick =
                         MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
                             FontSize,
                             Foreground, Background).First();
 
-                    b.TextX = b.NickX + b.Nick.WidthIncludingTrailingWhitespace;
-                    _columnWidth = b.TextX;
+                    b.NickWidth = nick.WidthIncludingTrailingWhitespace;
 
-                    //b.Text = MessageFormatter.Format(b.Source.Text, null )
-                    b.Text = MessageFormatter.Format(b.Source.Text, b.Source, this.ViewportWidth, GetTypeFace(),
-                        this.FontSize, this.Foreground, this.Background);
+                    // update the separator line, pushing it out to fit longest nick
+                    double testOffset = time.WidthIncludingTrailingWhitespace + TimeNickSeparatorPadding +
+                                        nick.WidthIncludingTrailingWhitespace + SeparatorPadding;
+                    if (testOffset > _separatorOffsetX)
+                    {
+                        _separatorOffsetX = testOffset;
+                    }
 
+                    // nick goes left of Separator
+                    b.NickX = _separatorOffsetX - (SeparatorPadding + nick.WidthIncludingTrailingWhitespace);
+                    // text goes right of separator
+                    b.TextX = _separatorOffsetX + (SeparatorPadding);                    
 
-                    b.Height = b.Nick != null ? Math.Max(b.Nick.Height, b.Time.Height) : b.Time.Height;
+                    var text = MessageFormatter.Format(b.Source.Text, b.Source, ViewportWidth - b.TextX, GetTypeFace(),
+                        FontSize, Foreground, Background);
+                    b.NumLines = text.Count;
+                    _totalLines += Math.Max(1, text.Count);
+
+                    b.Height = Math.Max(1, text.Count)*LineHeight;
 
                     // draw block                                        
-                    b.Y = vPos - b.Height;
-                    vPos -= b.Height;                    
-                    b.Nick?.Draw(drawingContext, new Point(b.NickX, b.Y), InvertAxes.None);
-                    b.Time?.Draw(drawingContext, new Point(0.0, b.Y), InvertAxes.None);
+                    b.Y = vPos;
+                    vPos += b.Height;
+                    nick.Draw(drawingContext, new Point(b.NickX, b.Y), InvertAxes.None);
+                    time.Draw(drawingContext, new Point(0.0, b.Y), InvertAxes.None);
                     double accumulator = 0.0;
 
-                    if (b.Text != null)
+                    foreach (var textLine in text)
                     {
-                        foreach (var textLine in b.Text)
-                        {
-                            textLine.Draw(drawingContext, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
-                            accumulator += textLine.TextHeight;
-                        }
+                        textLine.Draw(drawingContext, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
+                        accumulator += textLine.TextHeight;
+                        textLine.Dispose();
                     }
+                    time.Dispose();
+                    _blocks.Add(b);
                 }
             }
         }
@@ -100,7 +133,7 @@ namespace Cobalt.Controls
             if (sizeInfo.WidthChanged)
             {
                 InvalidateAll();
-            }
+            }      
             base.OnRenderSizeChanged(sizeInfo);
         }
 

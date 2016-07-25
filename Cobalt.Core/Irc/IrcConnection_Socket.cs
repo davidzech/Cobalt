@@ -141,11 +141,11 @@ namespace Cobalt.Core.Irc
 
                     if (completed == heartBeatTask)
                     {
-                        await Socket_OnHeartbeat();
+                        await Socket_OnHeartbeat().ConfigureAwait(false);
                     }
                     else if (completed == readTask)
                     {
-                        var read = await readTask;
+                        var read = await readTask.ConfigureAwait(false);
                         if (read == 0)
                         {
                             // 0 bytes mean socket close
@@ -188,24 +188,21 @@ namespace Cobalt.Core.Irc
 
         }
 
-        private async Task PostMessageAsync(IrcMessage message)
+        private Task PostMessageAsync(IrcMessage message)
         {
             if (_tcpClient.Connected && _stream != null)
             {
-                try
-                {
-                    var writeBuffer = new byte[Encoding.UTF8.GetMaxByteCount(512)];
-                    var output = message.ToString();
-                    var count = Encoding.UTF8.GetBytes(output, 0, output.Length, writeBuffer, 0);
-                    count = Math.Min(510, count);
-                    writeBuffer[count] = 0xd;
-                    writeBuffer[count + 1] = 0xa;
-                    await _stream.WriteAsync(writeBuffer, 0, count + 2, _wtoken.Token).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {                    
-                    OnConnectionError(new ErrorEventArgs(e));
-                }
+                var writeBuffer = new byte[Encoding.UTF8.GetMaxByteCount(512)];
+                var output = message.ToString();
+                var count = Encoding.UTF8.GetBytes(output, 0, output.Length, writeBuffer, 0);
+                count = Math.Min(510, count);
+                writeBuffer[count] = 0xd;
+                writeBuffer[count + 1] = 0xa;
+                return _stream.WriteAsync(writeBuffer, 0, count + 2, _wtoken.Token);
+            }
+            else
+            {
+                return default(Task);
             }
         }
 
@@ -223,16 +220,17 @@ namespace Cobalt.Core.Irc
                 ExternalAddress = addr.AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
         }
 
-        private async Task Socket_OnHeartbeat()
+        private Task Socket_OnHeartbeat()
         {
             if (_isWaitingForActivity)
             {
                 Close();
+                return default(Task);
             }
             else
             {
                 _isWaitingForActivity = true;
-                await SendAsync("PING", Hostname).ConfigureAwait(false);
+                return SendAsync("PING", Hostname);
             }
         }
     }
