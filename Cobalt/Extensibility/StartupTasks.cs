@@ -52,7 +52,7 @@ namespace Cobalt.Extensibility
         public void ApplyViewLocatorOverride()
         {
             var viewLocator = _serviceLocator.GetInstance<IViewLocator>();
-            Caliburn.Micro.ViewLocator.GetOrCreateViewType = viewLocator.GetOrCreateViewType;
+            //Caliburn.Micro.ViewLocator.GetOrCreateViewType = viewLocator.GetOrCreateViewType;            
         }        
     }
 }

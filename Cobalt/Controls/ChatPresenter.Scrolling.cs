@@ -10,7 +10,7 @@ namespace Cobalt.Controls
         public bool IsAutoScrolling => _isAutoScrolling;
         public bool CanHorizontallyScroll { get { return false; } set { } }
         public bool CanVerticallyScroll { get { return true; } set { } }
-        public double ExtentHeight => _totalLines;
+        public double ExtentHeight => _totalLines * LineHeight;
         public double ExtentWidth => ActualWidth;
         public ScrollViewer ScrollOwner { get { return _viewer; } set { _viewer = value; } }
         public double ViewportHeight { get; set; }
@@ -56,21 +56,24 @@ namespace Cobalt.Controls
             }
             else
             {
-                ViewportHeight = Math.Round(constraint.Height / LineHeight);
+                ViewportHeight = Math.Round(constraint.Height);
             }
             InvalidateScrollInfo();
-            return new Size(ViewportHeight * LineHeight, ViewportWidth);
+            return new Size(ViewportHeight, ViewportWidth);
         }
 
-        public void ScrollTo(int pos)
+        public void ScrollTo(double pos)
         {
-            pos = Math.Max(0, Math.Min(_totalLines - VisibleLineCount, pos));
+            if (pos < 0 || ExtentHeight < ViewportHeight)
+            {
+                pos = 0;
+            }
+            pos = Math.Min(ExtentHeight, pos);
             _scrollPos = pos;
 
-            InvalidateVisual();
-            InvalidateScrollInfo();
+            InvalidateAll();
 
-            _isAutoScrolling = _scrollPos == 0;
+            _isAutoScrolling = _scrollPos <= 0.0;
         }
 
         public void SetVerticalOffset(double offset)
@@ -124,6 +127,6 @@ namespace Cobalt.Controls
             _viewer?.InvalidateScrollInfo();
         }
 
-        public int VisibleLineCount => Convert.ToInt32(ViewportHeight);
+        public int VisibleLineCount => Convert.ToInt32(ViewportHeight / LineHeight);
     }
 }

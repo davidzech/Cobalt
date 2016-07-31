@@ -70,7 +70,7 @@ namespace Cobalt.ViewModels
             }
         }
 
-        private int _bufferLines = 100;
+        private int _bufferLines = 500;
 
         public int BufferLines
         {
@@ -100,6 +100,6 @@ namespace Cobalt.ViewModels
         {        
             TryClose();
             await Connection.QuitAsync("Leaving").ConfigureAwait(false);
-        }       
+        }      
     }
 }

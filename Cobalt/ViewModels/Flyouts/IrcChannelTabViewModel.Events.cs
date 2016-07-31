@@ -15,7 +15,7 @@ namespace Cobalt.ViewModels
             base.Connection_PrivateMessaged(sender, e);
             if (!e.Handled && e.To.IsChannel && e.To.Name == this.ChannelName) 
             {
-                for(int i = 0; i < 50; i++)
+                for(int i = 0; i < 500; i++)
                 Write(MessageType.Default, e.From, e.Text + i);
             }
         }

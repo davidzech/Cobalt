@@ -25,15 +25,14 @@ namespace Cobalt.Extensibility
             {
                 Caliburn.Micro.ViewLocator.InitializeComponent(cached);
                 return cached;
-            }
+            }            
 
             if (viewType.IsInterface || viewType.IsAbstract || !typeof(UIElement).IsAssignableFrom(viewType))
             {
                 return new TextBlock { Text = $"Cannot create {viewType.FullName}."};
             }
 
-            var newInstance = (UIElement)Activator.CreateInstance(viewType);
-
+            var newInstance = (UIElement)Activator.CreateInstance(viewType);            
             Caliburn.Micro.ViewLocator.InitializeComponent(newInstance);
             return newInstance;
         }

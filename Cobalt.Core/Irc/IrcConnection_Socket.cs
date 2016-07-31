@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -44,6 +45,8 @@ namespace Cobalt.Core.Irc
                     Task.Run(async () => await Task.Delay(5000, _wtoken.Token).ConfigureAwait(false));
                 var firstCompletedTask = await Task.WhenAny(connectTask, connectTimeoutTask).ConfigureAwait(false);
 
+                _wtoken.Token.ThrowIfCancellationRequested();
+
                 if (firstCompletedTask == connectTimeoutTask)
                 {
                     State = IrcConnectionState.Disconnected;
@@ -52,7 +55,7 @@ namespace Cobalt.Core.Irc
                 else
                 {
                     await connectTask; // we await the finished task so we can throw the exception
-                    await SocketEntryAsync(_wtoken.Token).ConfigureAwait(false);
+                    await SocketEntryAsync().ConfigureAwait(false);
                     await Socket_OnConnected();
                 }
             }
@@ -68,18 +71,22 @@ namespace Cobalt.Core.Irc
             {
                 OnConnectionError(new ErrorEventArgs(e));
             }
+            catch (OperationCanceledException)
+            {
+                _tcpClient?.Close();
+                _tcpClient = null;
+            }
         }
 
         private void Close()
         {
-            _wtoken?.Cancel();
-            _tcpClient?.Close();
-            _tcpClient = null;
+            _wtoken?.Cancel();       
             State = IrcConnectionState.Disconnected;
         }
 
-        private async Task SocketEntryAsync(CancellationToken ct)
+        private async Task SocketEntryAsync()
         {
+            CancellationToken ct = _wtoken.Token;
             _stream = _tcpClient.GetStream();
             if (IsSecure)
             {
@@ -102,14 +109,12 @@ namespace Cobalt.Core.Irc
                 _stream = sslStream;
             }
 
-
-            TaskFactory f = new TaskFactory();
-            await f.StartNew(async () =>
+            await Task.Factory.StartNew(async () =>
             {
                 await Task.Yield(); // yield to fire and forget
                 try
                 {
-                    await SocketLoopAsync(ct).ConfigureAwait(false);
+                    await SocketLoopAsync().ConfigureAwait(false);
                 }
                 catch (IOException ex)
                 {
@@ -118,26 +123,33 @@ namespace Cobalt.Core.Irc
                 catch (SocketException ex)
                 {
                     OnConnectionError(new ErrorEventArgs(ex));
-                }                
+                }
+                catch (OperationCanceledException)
+                {
+                    Debug.WriteLine("Operation canceled");
+                }
                 finally
                 {
-                    Close();
+                    _tcpClient?.Close();
+                    _tcpClient = null;
                 }
-            }, _wtoken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);            
+
+            }, ct, TaskCreationOptions.LongRunning, TaskScheduler.Current).ConfigureAwait(false);            
         }
 
-        private async Task SocketLoopAsync(CancellationToken ct)
+        private async Task SocketLoopAsync()
         {
-            try
-            {
+            CancellationToken ct = _wtoken.Token;
                 byte[] readBuffer = new byte[512];
 
-                while (_tcpClient != null && _tcpClient.Connected && !_wtoken.Token.IsCancellationRequested)
+                while (_tcpClient != null && _tcpClient.Connected && !ct.IsCancellationRequested)
                 {
                     var heartBeatTask = Task.Delay(HeartbeatInterval, ct);
                     var readTask = _stream.ReadAsync(readBuffer, 0, 512, ct);
 
                     var completed = await Task.WhenAny(heartBeatTask, readTask).ConfigureAwait(false);
+
+                    ct.ThrowIfCancellationRequested();
 
                     if (completed == heartBeatTask)
                     {
@@ -155,7 +167,7 @@ namespace Cobalt.Core.Irc
                         {
                             var gotCarriageReturn = false;
                             var input = new List<byte>();
-                            for(int i = 0; i < read; i++)
+                            for (int i = 0; i < read; i++)
                             {
                                 byte cur = readBuffer[i];
                                 switch (cur)
@@ -179,13 +191,6 @@ namespace Cobalt.Core.Irc
                         }
                     }
                 }
-                Close();
-            }
-            catch (Exception e)
-            {
-                OnConnectionError(new ErrorEventArgs(e));
-            }
-
         }
 
         private Task PostMessageAsync(IrcMessage message)

@@ -14,7 +14,7 @@ namespace Cobalt.ViewModels
 
     [Export(typeof(IShell))]
     // ReSharper disable once ClassNeverInstantiated.Global
-    public sealed class ShellViewModel : Conductor<IrcTabViewModel>, IDragSource, IDropTarget, IShell
+    public sealed class ShellViewModel : Conductor<IrcTabViewModel>.Collection.OneActive, IDragSource, IDropTarget, IShell
     {
         private readonly BindableCollection<IFlyout> _flyoutCollection = new BindableCollection<IFlyout>();
         private readonly IFlyout _networksFlyout;
@@ -27,7 +27,7 @@ namespace Cobalt.ViewModels
         {
             _windowManager = windowManager;
             Activated += MainViewModel_Activated;
-            _tabs.CollectionChanged += _tabs_CollectionChanged;
+            _tabs.CollectionChanged += _tabs_CollectionChanged;            
             _networksFlyout = new NetworksFlyoutViewModel(coordinator, settings) { Parent = this };
         }
 
@@ -167,7 +167,7 @@ namespace Cobalt.ViewModels
         }
 
         public override void DeactivateItem(IrcTabViewModel item, bool close)
-        {
+        {            
             if (close)
             {
                 if (item.IsChannel)

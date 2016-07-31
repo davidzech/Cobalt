@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Cobalt.Controls
 {
@@ -35,13 +37,21 @@ namespace Cobalt.Controls
             if (newCollection != null)
             {
                 newCollection.CollectionChanged += Collection_CollectionChanged;
+                Application.Current.Dispatcher.InvokeAsync(Redraw, DispatcherPriority.Render);
             }
         }
 
         private void Collection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            InvalidateAll();
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                FormatNewMessages();
+                PruneOutdatedMessages();
+                InvalidateAll();
+            }, DispatcherPriority.ApplicationIdle);
         }
+
+
 
         private Typeface GetTypeFace()
         {

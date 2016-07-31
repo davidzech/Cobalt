@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,6 +98,16 @@ namespace Cobalt.ViewModels
         {
             base.Connection_ConnectionError(sender, e);
             Write(MessageType.Info, "", e.Message);
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            base.OnDeactivate(close);
+        }
+
+        ~IrcServerTabViewModel()
+        {
+            Debug.WriteLine("Destroyed");
         }
     }
 }

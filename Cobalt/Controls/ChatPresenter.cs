@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
+using System.Windows.Threading;
+using Caliburn.Micro;
 
 namespace Cobalt.Controls
 {
@@ -13,8 +18,8 @@ namespace Cobalt.Controls
     {
         private ScrollViewer _viewer;
         private int _totalLines;
-        private IList<IBlock> _blocks = new List<IBlock>();
-        private int _scrollPos = 0;
+        private LinkedList<VisualBlock> _blocks = new LinkedList<VisualBlock>();
+        private double _scrollPos = 0.0;
         private bool _isAutoScrolling = true;
         private readonly double TimeNickSeparatorPadding = 6.0;
         private readonly double SeparatorPadding = 6.0;
@@ -44,9 +49,11 @@ namespace Cobalt.Controls
 
             drawingContext.DrawRectangle(Background, null, new Rect(new Size(ActualWidth, ActualHeight)));
 
-            FormatAndDrawAllMessages(drawingContext);
-            DrawSeparatorLine(drawingContext, m.M11);
+            DrawVirtualizedMessages(drawingContext, m.M11);
+            DrawSeparatorLine(drawingContext, m.M11);            
+
         }
+
 
         private void DrawSeparatorLine(DrawingContext dc, double dpi = 1.0)
         {
@@ -57,46 +64,105 @@ namespace Cobalt.Controls
             guidelines.GuidelinesX.Add(Math.Ceiling(offsetX) + p.Thickness / 2);
             guidelines.GuidelinesX.Add(Math.Ceiling(offsetX + 1) + p.Thickness / 2);
             dc.PushGuidelineSet(guidelines);
-            dc.DrawLine(p, new Point(offsetX, 0.0), new Point(offsetX, ActualHeight));
+            dc.DrawLine(p, new Point(offsetX, 0.0), new Point(offsetX, ActualHeight));           
         }
 
-        private void DrawBlock(DrawingContext ctx, Block b, double yPos)
+        private void DrawBlock(DrawingContext ctx, VisualBlock b, ref double yPos)
         {
-            
+            b.TimeTextLine?.Draw(ctx, new Point(0, yPos), InvertAxes.None);
+            b.NickTextLine?.Draw(ctx, new Point(b.NickX, yPos), InvertAxes.None);
+
+            double acc = 0.0;
+            foreach (var t in b.TextLines)
+            {
+                t.Draw(ctx, new Point(b.TextX, yPos + acc), InvertAxes.None);
+                acc += LineHeight;
+            }
+            yPos += b.Height;
         }
 
-        private void RenderVirtualizedMessages(DrawingContext ctx, double dpi = 1.0)
+        private Tuple<LinkedListNode<VisualBlock>, int, double> FindStartingLine()
         {
-            
+            double heightAccumulator = 0.0;
+            var node = _blocks.First;
+            while(node != null)
+            {
+                var b = node.Value;
+                for (int i = 0; i < b.NumLines; i++)
+                {
+                    if (heightAccumulator > _scrollPos)
+                    {
+                        return new Tuple<LinkedListNode<VisualBlock>, int, double>(node, i, heightAccumulator);
+                    }
+                    heightAccumulator += LineHeight;
+                }
+                node = node.Next;
+            }
+            return null;
         }
 
-        private void FormatAndDrawAllMessages(DrawingContext ctx, double dpi = 1.0)
+        private void DrawVirtualizedMessages(DrawingContext ctx, double dpi = 1.0)
         {
-            _blocks.Clear();
-            _totalLines = 0;
-            double vPos = -(_scrollPos * LineHeight);
+            // find the block that should be drawn at scrollPos
+
+            Tuple<LinkedListNode<VisualBlock>, int, double> startingLine = FindStartingLine();
+            if (startingLine == null)
+            {
+                return;
+            }
+
+            double vPos = (startingLine.Item3 - _scrollPos);
+
+            var node = startingLine.Item1;
+            while (vPos < ViewportHeight && node != null)
+            {
+                DrawBlock(ctx, node.Value, ref vPos);
+                node = node.Next;
+            }
+        }
+
+        private void PruneOutdatedMessages()
+        {
+            int delta = _blocks.Count - MessagesSource.Count();
+            if (delta > 0)
+            {
+                for (var i = 0; i < delta; i++)
+                {
+                    _blocks.First.Value.Dispose();
+                    _blocks.RemoveFirst();
+                    _totalLines--;
+                }
+            }
+        }
+
+        private void FormatNewMessages()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             foreach (var message in MessagesSource)
             {
-                Block b = new Block { Source = message };
+                if (_blocks.All(b => b.Source != message))
                 {
-                    b.TimeString = b.Source.Time.ToShortDateString();
-                    b.NickString = b.Source.NickName;
-                    var time =
-                        MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
-                            Foreground, Background).First();
+                    VisualBlock b = new VisualBlock()
+                    {
+                        Source = message,
+                        TimeString = message.Time.ToShortDateString(),
+                        NickString = message.NickName,
+                    };
 
+                    var time =
+                       MessageFormatter.Format(b.TimeString, null, ViewportWidth, GetTypeFace(), FontSize,
+                           Foreground, Background).First();
                     b.TimeWidth = time.WidthIncludingTrailingWhitespace;
 
                     var nick =
-                        MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
-                            FontSize,
-                            Foreground, Background).FirstOrDefault();
+                       MessageFormatter.Format(b.NickString, null, ViewportWidth - b.NickX, GetTypeFace(),
+                           FontSize,
+                           Foreground, Background).FirstOrDefault();
 
                     b.NickWidth = nick?.WidthIncludingTrailingWhitespace ?? 0;
 
-                    // update the separator line, pushing it out to fit longest nick
-                    double testOffset = b.TimeWidth + TimeNickSeparatorPadding +
-                                        b.NickWidth + SeparatorPadding;
+                    double testOffset = b.TimeWidth + TimeNickSeparatorPadding + b.NickWidth + SeparatorPadding;
                     if (testOffset > _separatorOffsetX)
                     {
                         _separatorOffsetX = testOffset;
@@ -110,34 +176,43 @@ namespace Cobalt.Controls
                     var text = MessageFormatter.Format(b.Source.Text, b.Source, ViewportWidth - b.TextX, GetTypeFace(),
                         FontSize, Foreground, Background);
                     b.NumLines = text.Count;
-                    _totalLines += Math.Max(1, text.Count);                    
+                    _totalLines += Math.Max(1, text.Count);
                     b.Height = Math.Max(1, text.Count) * LineHeight;
 
-                    // draw block                                        
-                    b.Y = vPos;
-                    vPos += b.Height;
-                    nick?.Draw(ctx, new Point(b.NickX, b.Y), InvertAxes.None);
-                    time.Draw(ctx, new Point(0.0, b.Y), InvertAxes.None);
-                    double accumulator = 0.0;
+                    b.TimeTextLine = time;
+                    b.NickTextLine = nick;
+                    b.TextLines = text;
 
-                    foreach (var textLine in text)
-                    {
-                        textLine.Draw(ctx, new Point(b.TextX, b.Y + accumulator), InvertAxes.None);
-                        accumulator += textLine.TextHeight;
-                        textLine.Dispose();
-                    }
-                    time.Dispose();
-                    _blocks.Add(b);
+                    _blocks.AddLast(b);
                 }
             }
+            sw.Stop();
+            Debug.WriteLine($"Elapsed={sw.Elapsed.TotalMilliseconds}");
+        }
+
+        private void InvalidateMessagesCache()
+        {
+            //_blocks.Clear();
+            _totalLines = 0;
+        }
+
+        private void Redraw()
+        {
+            //InvalidateMessagesCache();
+            //FormatNewMessages();
+            InvalidateAll();
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             if (sizeInfo.WidthChanged)
             {
+                Application.Current.Dispatcher.InvokeAsync(Redraw, DispatcherPriority.ApplicationIdle);
+            }
+            else
+            {
                 InvalidateAll();
-            }      
+            }
             base.OnRenderSizeChanged(sizeInfo);
         }
 
@@ -145,6 +220,20 @@ namespace Cobalt.Controls
         {
             InvalidateVisual();
             InvalidateScrollInfo();
+        }
+
+        ~ChatPresenter()
+        {
+            if (_blocks != null)
+            {
+                InvalidateMessagesCache();
+            }
+            if (MessagesSource is INotifyCollectionChanged)
+            {
+                INotifyCollectionChanged a = MessagesSource as INotifyCollectionChanged;
+                a.CollectionChanged -= Collection_CollectionChanged;
+            }
+            Debug.WriteLine("ChatPresenter destroyed");
         }
     }
 }
