@@ -52,5 +52,10 @@ namespace Cobalt.Behaviors
                 AssociatedObject.PasswordChanged -= AssociatedObject_PasswordChanged;
             }
         }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
