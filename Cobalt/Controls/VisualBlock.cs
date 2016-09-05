@@ -25,11 +25,11 @@ namespace Cobalt.Controls
         public IList<TextLine> TextLines { get; set; }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -54,7 +54,7 @@ namespace Cobalt.Controls
                 }
                
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

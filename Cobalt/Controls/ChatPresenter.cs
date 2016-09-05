@@ -15,8 +15,9 @@ using Caliburn.Micro;
 namespace Cobalt.Controls
 {
     internal partial class ChatPresenter : Control, IScrollInfo
-    {
+    {        
         private ScrollViewer _viewer;
+        private VisualCollection _children;
         private int _totalLines;
         private LinkedList<VisualBlock> _blocks = new LinkedList<VisualBlock>();
         private double _scrollPos = 0.0;
@@ -33,7 +34,19 @@ namespace Cobalt.Controls
 
         public ChatPresenter()
         {
+            _children = new VisualCollection(this);               
             MessagesSource = new List<MessageLine>();
+        }
+
+        protected override int VisualChildrenCount => _children.Count;
+
+        protected override Visual GetVisualChild(int index)
+        {
+            if (index < 0 || index >= _children.Count)
+            {
+                throw new ArgumentOutOfRangeException($"{index} is out of range. Must be between [0 - {_children.Count}");
+            }
+            return _children[index];
         }
 
         private double LineHeight => FontSize*FontFamily.LineSpacing;
@@ -48,8 +61,6 @@ namespace Cobalt.Controls
             var m = visual.CompositionTarget.TransformToDevice;
 
             drawingContext.DrawRectangle(Background, null, new Rect(new Size(ActualWidth, ActualHeight)));
-
-            DrawVirtualizedMessages(drawingContext, m.M11);
             DrawSeparatorLine(drawingContext, m.M11);            
 
         }

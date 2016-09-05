@@ -10,6 +10,7 @@
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:b="clr-namespace:Cobalt.Behaviors"
              xmlns:metro="clr-namespace:MahApps.Metro;assembly=MahApps.Metro"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              Width="400"
              d:DesignHeight="500" d:DesignWidth="400" d:DataContext="{d:DesignInstance {x:Type vms:NetworksFlyoutViewModel}}">
@@ -32,10 +33,10 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <Button x:Name="AddNetwork" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}">
-                        <controls:PackIconModern Width="10" Height="10" Kind="Add" Foreground="{DynamicResource BlackColorBrush}"/>
+                        <iconPacks:PackIconModern Width="10" Height="10" Kind="Add" Foreground="{DynamicResource BlackColorBrush}"/>
                     </Button>
                     <Button x:Name="RemoveNetwork" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}">
-                        <controls:PackIconModern Width="10" Height="10" Kind="Close" Foreground="{DynamicResource BlackColorBrush}"/>
+                        <iconPacks:PackIconModern Width="10" Height="10" Kind="Close" Foreground="{DynamicResource BlackColorBrush}"/>
                     </Button>
                 </StackPanel>
                 <ListBox x:Name="listBox" ItemsSource="{Binding Networks}" SelectedItem="{Binding SelectedNetwork}" Grid.Row="1" DisplayMemberPath="Name"/>
@@ -86,10 +87,10 @@
                                 </DataGrid>
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
                                     <Button x:Name="AddChannel" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}" >
-                                        <controls:PackIconModern Width="10" Height="10" Kind="Add" Foreground="{DynamicResource BlackColorBrush}"/>
+                                        <iconPacks:PackIconModern Width="10" Height="10" Kind="Add" Foreground="{DynamicResource BlackColorBrush}"/>
                                     </Button>
                                     <Button x:Name="RemoveChannel" Height="30" Width="30" Style="{DynamicResource MetroCircleButtonStyle}">
-                                        <controls:PackIconModern Width="10" Height="10" Kind="Close" Foreground="{DynamicResource BlackColorBrush}"/>
+                                        <iconPacks:PackIconModern Width="10" Height="10" Kind="Close" Foreground="{DynamicResource BlackColorBrush}"/>
                                     </Button>
                                 </StackPanel>
                             </Grid>

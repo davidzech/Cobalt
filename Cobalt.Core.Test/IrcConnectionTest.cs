@@ -170,7 +170,7 @@ namespace Cobalt.Core.Tests
                         caughtError = true;
                         stoken.Cancel();
                     };
-                    await c.ConnectAsync("irc.cobaltapp.net", 6667, true, "Test", "Test", "Test", false);
+                    await c.ConnectAsync("phusion.io", 6667, true, "Test", "Test", "Test", false);
                     Assert.IsFalse(c.State == IrcConnectionState.Disconnected);
                     await t;
                     Assert.IsTrue(caughtError);
