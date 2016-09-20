@@ -19,7 +19,6 @@
     </UserControl.Resources>
     <Grid>
         <Grid.Resources>
-            <ResourceDictionary Source="/Resources/Icons.xaml"/>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
